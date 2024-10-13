@@ -17,11 +17,12 @@ public class Tiny {
                     System.out.println(args.length);
                     s = System.in;
                 }
-        Tiny lexer = new Tiny(s);
+        Tiny lexer = new Tiny(s, "UTF-8");
         Token token;
 
         while ((token = lexer.getNextToken()).kind != EOF) {
-            System.out.println("parola: " + token.image + " Token associato: " + tokenImage[token.kind]);
+            System.out.println("lessema: " + token.image + " --> Token associato: " + tokenImage[token.kind]);
+             System.out.println("-------------------");
         }
     }
 }
@@ -29,11 +30,23 @@ public class Tiny {
 PARSER_END(Tiny)
 
 TOKEN : {
-    <COMMENT: "{" (~["}"])* "}" >
+   <ASSIGMENT: ":=">
+  | <MULT_DIV: ("/"|"*")>
+  | <SUM_DIF: ("-"|"+")>
+  | <NUMBER: <NUMBA>>
+  | <COMMENT: "{" (~["}"])* "}" >
+  | <END: "end">
   | <READFNC: "read">
   | <WRITEFNC: "write">
+  | <SEMICOLON: ";">
+  | <THEN: "then">
+  | <IF: "if">
+  | <COMPARISON: ("<"|"="|">")>
+  | <REPEAT: "repeat">
+  | <UNTIL: "until">
   | <ID: ["A"-"Z","a"-"z"](["A"-"Z", "a"-"z", "0"-"9" ,"_" ])*>
-  | <PUNTO_E_VIRGOLA: ";">
+  | <#NUMBA: (["0"-"9"])+>
+
 }
 
 SKIP : {

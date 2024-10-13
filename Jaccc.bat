@@ -1,5 +1,5 @@
 @echo off
-echo start command
+echo STARTING COMPILATION PROCESS
 
 IF "%1"=="" (
     echo Specifica un nome di file come argomento.
@@ -11,18 +11,17 @@ IF NOT EXIST "javaFile\" (
 )
 
 cd javaFile
-del *.java
+echo Y | del *.java
 cd ..
-cd src
 
-echo before javacc
+echo Javacc CALLED -------------
+echo.
 call javacc %1
-move *.java "..\javaFile\"
 
-cd ..
+move *.java "javaFile\"
+echo.
+
 cd javaFile
-echo moved java files to javaFile \n
-
 
 if NOT EXIST "javaCompiled\" (
     echo creating javaCompiled
@@ -31,8 +30,10 @@ if NOT EXIST "javaCompiled\" (
 
 call javac *.java
 cd javaCompiled
-del *.*
+echo Y | del *.*
 
 cd ..
 move *.class "javaCompiled\"
 cd ..
+echo.
+echo COMPILED SUCCESSFULLY!!.
