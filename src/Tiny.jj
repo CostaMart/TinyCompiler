@@ -1,0 +1,41 @@
+PARSER_BEGIN(Tiny)
+
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.IOException;
+import java.io.FileNotFoundException;
+
+public class Tiny {
+    public static void main(String[] args) throws ParseException, FileNotFoundException {
+        InputStream s;
+        if(args.length > 0){
+                        String fileName = args[0];
+                        s = new FileInputStream(args[0]);
+                }
+
+                else {
+                    System.out.println(args.length);
+                    s = System.in;
+                }
+        Tiny lexer = new Tiny(s);
+        Token token;
+
+        while ((token = lexer.getNextToken()).kind != EOF) {
+            System.out.println("parola: " + token.image + " Token associato: " + tokenImage[token.kind]);
+        }
+    }
+}
+
+PARSER_END(Tiny)
+
+TOKEN : {
+    <COMMENT: "{" (~["}"])* "}" >
+  | <READFNC: "read">
+  | <WRITEFNC: "write">
+  | <ID: ["A"-"Z","a"-"z"](["A"-"Z", "a"-"z", "0"-"9" ,"_" ])*>
+  | <PUNTO_E_VIRGOLA: ";">
+}
+
+SKIP : {
+    < SKIPPED : [" ", "\t", "\n", "\r"] >
+}
