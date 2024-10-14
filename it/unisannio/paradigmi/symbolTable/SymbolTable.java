@@ -7,50 +7,75 @@ import java.util.Map;
 
 public class SymbolTable {
 
-    private final Map<String, List<Record>> table = new HashMap<String, List<Record>>();
+    // hash table -> keys are integer because tokens are treated like enums in JavaCC. If you want to check the value go to ...Constants.java JavaCC generated file
+    private final Map<Integer, List<Record>> table = new HashMap<Integer, List<Record>>();
 
-    public void put(String name, String identifier, int type, int beginLine, int endLine, int beginColumn, int endColumn){
-        if (!table.containsKey(name)) table.put(name, new ArrayList<Record>());
-        List<Record> l = table.get(name);
-        l.add(new Record(identifier, type, beginLine, endLine, endColumn, beginColumn));
+    public void put(int token, String value, int beginLine, int endLine, int beginColumn, int endColumn){
+        if (!table.containsKey(token)) table.put(token, new ArrayList<Record>());
+        List<Record> l = table.get(token);
+        l.add(new Record(value, beginLine, endLine, endColumn, beginColumn));
     }
-    //  lol
+
+    public Record getRecord(int token,  int beginLine, int beginColum){
+        List<Record> l = table.get(token);
+        if (l == null) return null;
+        return l.stream().filter((r)-> r.beginColumn == beginColum && r.beginLine == beginLine).findFirst().orElse(null);
+    }
+
     // Metodo per stampare la symbol table
     public void printTable() {
         System.out.println("\n\n");
-        System.out.printf("%-20s %-10s %-10s %-10s %-10s %-10s%n", "Identificatore", "Tipo", "ILinea", "FLinea", "IColonna", "FColonna");
+        System.out.printf("%-20s %-10s %-10s %-10s %-10s %-10s%n", "Kind (token)", "lessema", "ILinea", "FLinea", "IColonna", "FColonna");
         System.out.println("------------------------------------------------------------------------------------------------------------------");
 
-        for (Map.Entry<String, List<Record>> entry : table.entrySet()) {
+        for (Map.Entry<Integer, List<Record>> entry : table.entrySet()) {
             List<Record> records = entry.getValue();
 
             for (Record record : records) {
-                System.out.printf("%-20s %-10d %-10d %-10d %-10d %-10d%n",
-                        record.identifier, record.type, record.beginLine, record.endLine,
+                System.out.printf("%-20s %-10s %-10d %-10d %-10d %-10d%n",
+                        entry.getKey(), record.lex, record.beginLine, record.endLine,
                         record.beginColumn, record.endColumn); // Rimosso l'ambito dalla stampa
             }
         }
     }
 
 
-    class Record {
+    public class Record {
+        String lex; // lessema
+        int beginLine; // punto di inizio del lessema nel codice (rispetto alla linea)
+        int endLine; // punto di fine lessema nel codice (rispetto alla linea)
+        int beginColumn; // punto di inizio lessema nel codice (rispetto alla colonna)
+        int endColumn; // punto di fine lessema nel codice (rispetto alla colonna)
 
-        String identifier;
-        int type;
-        int beginLine;
-        int endLine;
-        int endColumn;
-        int beginColumn; // dimensione in byte
-
-        public Record(String identifier, int type, int beginLine, int endLine, int endColumn, int beginColumn) {
-            this.identifier = identifier;
-            this.type = type;
+        public Record(String lex, int beginLine, int endLine, int endColumn, int beginColumn) {
+            this.lex = lex;
             this.beginLine = beginLine;
             this.endLine = endLine;
             this.endColumn = endColumn;
             this.beginColumn = beginColumn;
-
         }
+
+
+        public String getLex() {
+            return lex;
+        }
+
+        public int getBeginLine() {
+            return beginLine;
+        }
+
+        public int getEndLine() {
+            return endLine;
+        }
+
+        public int getEndColumn() {
+            return endColumn;
+        }
+
+        public int getBeginColumn() {
+            return beginColumn;
+        }
+
     }
 
 }

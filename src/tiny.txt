@@ -5,6 +5,7 @@ fact:=1;
 repeat
 fact := fact*x;
 x := x-1
+x := 4/2
 until x=0;
 write fact{output factorial of x}
 end
