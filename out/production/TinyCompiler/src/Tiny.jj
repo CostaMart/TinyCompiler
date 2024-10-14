@@ -1,0 +1,82 @@
+options {
+    Static = false;
+}
+
+PARSER_BEGIN(Tiny)
+
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.IOException;
+import java.io.FileNotFoundException;
+
+
+public class Tiny {
+    public static void main(String[] args) throws ParseException, FileNotFoundException {
+        InputStream s;
+        if(args.length > 0){
+                        String fileName = args[0];
+                        s = new FileInputStream(args[0]);
+                }
+
+                else {
+                    System.out.println(args.length);
+                    s = System.in;
+                }
+
+                TinyTokenManager tokenmanager = new TinyTokenManager(new SimpleCharStream(s));
+        Tiny lexer = new Tiny(s, "UTF-8");
+        Token token;
+
+        while ((token = tokenmanager.getNextToken()).kind != EOF) {
+
+            System.out.println("lessema: " + token.image + " --> Token associato: " + tokenImage[token.kind]);
+        }
+            System.out.println("N of keys: " + tokenmanager.KEYS);
+        System.out.println("N of CONTROLS: " + tokenmanager.CONTROLS);
+        System.out.println("N of comments: " + tokenmanager.COMMENTS);
+    }
+}
+
+PARSER_END(Tiny)
+
+// this adds paramiters to the tokenmanager
+TOKEN_MGR_DECLS:{
+   int KEYS=0;
+   int CONTROLS=0;
+   int COMMENTS=0;
+
+}
+
+TOKEN : {
+   <END: "end"> { KEYS++; } // with this sintax you can describe an operation to activate whenever the token is detected.
+  | <READFNC: "read"> { KEYS++; }
+  | <WRITEFNC: "write"> { KEYS++; }
+  | <SEMICOLON: ";"> { KEYS++; }
+  | <THEN: "then"> { KEYS++; }
+  | <IF: "if"> { KEYS++; CONTROLS++;}
+  | <REPEAT: "repeat"> { KEYS++; CONTROLS++; }
+  | <UNTIL: "until"> { KEYS++; }
+}
+
+TOKEN:{
+  <NUMBER: (<NUMBA>)+>
+  | <ID: <LETTER>(<LETTER> | <NUMBA> | "_" )*>
+}
+
+TOKEN:{
+   <ASSIGMENT: ":=">
+  | <MULT_DIV: ("/"|"*")>
+  | <SUM_DIF: ("-"|"+")>
+  | <COMPARISON: ("<"|"="|">")>
+}
+
+TOKEN: {
+  <#NUMBA: (["0"-"9"])>
+  | <#LETTER: (["A"-"Z","a"-"z"])>
+}
+
+
+SKIP : {
+    < SKIPPED : [" ", "\t", "\n", "\r"] >
+   | <COMMENT: "{" (~["}"])* "}" > {COMMENTS++;}
+}
