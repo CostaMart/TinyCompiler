@@ -31,7 +31,6 @@ public class Tiny {
 
             System.out.println("lessema: " + token.image + " --> Token associato: " + tokenImage[token.kind]);
         }
-
         System.out.println("N of keys: " + tokenmanager.KEYS);
         System.out.println("N of CONTROLS: " + tokenmanager.CONTROLS);
         System.out.println("N of comments: " + tokenmanager.COMMENTS);
