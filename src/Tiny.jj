@@ -4,9 +4,12 @@ options {
 
 PARSER_BEGIN(Tiny)
 
+package it.unisannio.paradigmi.generated;
+
+import it.unisannio.paradigmi.generated.ParseException;
+import it.unisannio.paradigmi.symbolTable.SymbolTable;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.io.IOException;
 import java.io.FileNotFoundException;
 
 
@@ -23,8 +26,7 @@ public class Tiny {
                     s = System.in;
                 }
 
-                TinyTokenManager tokenmanager = new TinyTokenManager(new SimpleCharStream(s));
-        Tiny lexer = new Tiny(s, "UTF-8");
+        TinyTokenManager tokenmanager = new TinyTokenManager(new SimpleCharStream(s));
         Token token;
 
         while ((token = tokenmanager.getNextToken()).kind != EOF) {
@@ -32,11 +34,19 @@ public class Tiny {
             System.out.println("lessema: " + token.image + " --> Token associato: " + tokenImage[token.kind]);
         }
 
+
         System.out.println("N of keys: " + tokenmanager.KEYS);
         System.out.println("N of CONTROLS: " + tokenmanager.CONTROLS);
         System.out.println("N of comments: " + tokenmanager.COMMENTS);
+        tokenmanager.symbolTable.printTable();
     }
-}
+
+    }
+
+
+
+
+
 
 PARSER_END(Tiny)
 
@@ -45,30 +55,30 @@ TOKEN_MGR_DECLS:{
    int KEYS=0;
    int CONTROLS=0;
    int COMMENTS=0;
-
+   SymbolTable symbolTable = new SymbolTable();
 }
 
-TOKEN : {
-   <END: "end"> { KEYS++; } // with this sintax you can describe an operation to activate whenever the token is detected.
-  | <READFNC: "read"> { KEYS++; }
-  | <WRITEFNC: "write"> { KEYS++; }
-  | <SEMICOLON: ";"> { KEYS++; }
-  | <THEN: "then"> { KEYS++; }
-  | <IF: "if"> { KEYS++; CONTROLS++;}
-  | <REPEAT: "repeat"> { KEYS++; CONTROLS++; }
-  | <UNTIL: "until"> { KEYS++; }
-}
-
-TOKEN:{
-  <NUMBER: (<NUMBA>)+>
-  | <ID: <LETTER>(<LETTER> | <NUMBA> | "_" )*>
+TOKEN : {               // with this sintax you can describe an operation to activate whenever the token is detected.
+   <END: "end"> { KEYS++; symbolTable.put(matchedToken.image,matchedToken.image, matchedToken.kind,  matchedToken.beginLine, matchedToken.endLine, matchedToken.beginColumn, matchedToken.endColumn);}
+  | <READFNC: "read"> { KEYS++; symbolTable.put(matchedToken.image,matchedToken.image, matchedToken.kind,  matchedToken.beginLine, matchedToken.endLine, matchedToken.beginColumn, matchedToken.endColumn);}
+  | <WRITEFNC: "write"> { KEYS++; symbolTable.put(matchedToken.image,matchedToken.image, matchedToken.kind,  matchedToken.beginLine, matchedToken.endLine, matchedToken.beginColumn, matchedToken.endColumn);}
+  | <SEMICOLON: ";"> { KEYS++; symbolTable.put(matchedToken.image, matchedToken.image,matchedToken.kind,  matchedToken.beginLine, matchedToken.endLine, matchedToken.beginColumn, matchedToken.endColumn);}
+  | <THEN: "then"> { KEYS++; symbolTable.put(matchedToken.image,matchedToken.image, matchedToken.kind,  matchedToken.beginLine, matchedToken.endLine, matchedToken.beginColumn, matchedToken.endColumn);}
+  | <IF: "if"> { KEYS++; CONTROLS++; symbolTable.put(matchedToken.image, matchedToken.image,matchedToken.kind,  matchedToken.beginLine, matchedToken.endLine, matchedToken.beginColumn, matchedToken.endColumn);}
+  | <REPEAT: "repeat"> { KEYS++; CONTROLS++; symbolTable.put(matchedToken.image,matchedToken.image,matchedToken.kind,  matchedToken.beginLine, matchedToken.endLine, matchedToken.beginColumn, matchedToken.endColumn);}
+  | <UNTIL: "until"> { KEYS++; symbolTable.put(matchedToken.image,matchedToken.image, matchedToken.kind,  matchedToken.beginLine, matchedToken.endLine, matchedToken.beginColumn, matchedToken.endColumn);}
 }
 
 TOKEN:{
-   <ASSIGMENT: ":=">
-  | <MULT_DIV: ("/"|"*")>
-  | <SUM_DIF: ("-"|"+")>
-  | <COMPARISON: ("<"|"="|">")>
+  <NUMBER: (<NUMBA>)+> { KEYS++; symbolTable.put(matchedToken.image,matchedToken.image, matchedToken.kind,  matchedToken.beginLine, matchedToken.endLine, matchedToken.beginColumn, matchedToken.endColumn);}
+  | <ID: <LETTER>(<LETTER> | <NUMBA> | "_" )*> { KEYS++; symbolTable.put(matchedToken.image,matchedToken.image, matchedToken.kind,  matchedToken.beginLine, matchedToken.endLine, matchedToken.beginColumn, matchedToken.endColumn);}
+}
+
+TOKEN:{
+   <ASSIGMENT: ":="> { KEYS++; symbolTable.put(matchedToken.image,matchedToken.image, matchedToken.kind,  matchedToken.beginLine, matchedToken.endLine, matchedToken.beginColumn, matchedToken.endColumn);}
+  | <MULT_DIV: ("/"|"*")> { KEYS++; symbolTable.put(matchedToken.image,matchedToken.image, matchedToken.kind,  matchedToken.beginLine, matchedToken.endLine, matchedToken.beginColumn, matchedToken.endColumn);}
+  | <SUM_DIF: ("-"|"+")> { KEYS++; symbolTable.put(matchedToken.image,matchedToken.image, matchedToken.kind,  matchedToken.beginLine, matchedToken.endLine, matchedToken.beginColumn, matchedToken.endColumn);}
+  | <COMPARISON: ("<"|"="|">")> { KEYS++; symbolTable.put(matchedToken.image,matchedToken.image, matchedToken.kind,  matchedToken.beginLine, matchedToken.endLine, matchedToken.beginColumn, matchedToken.endColumn);}
 }
 
 TOKEN: {
