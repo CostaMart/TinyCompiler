@@ -7,17 +7,19 @@ import java.util.Map;
 
 public class SymbolTable {
 
-    // hash table -> keys are integer because tokens are treated like enums in JavaCC. If you want to check the value go to ...Constants.java JavaCC generated file
-    private final Map<Integer, List<Record>> table = new HashMap<Integer, List<Record>>();
+    // hash table -> records in the table are indexed by their lex
+    private final Map<String, List<Record>> table = new HashMap<String, List<Record>>();
 
-    public void put(int token, String value, int beginLine, int endLine, int beginColumn, int endColumn){
-        if (!table.containsKey(token)) table.put(token, new ArrayList<Record>());
-        List<Record> l = table.get(token);
-        l.add(new Record(value, beginLine, endLine, endColumn, beginColumn));
+    // create a new record in the table
+    public void put(String lex, int token, int beginLine, int endLine, int beginColumn, int endColumn){
+        if (!table.containsKey(lex)) table.put(lex, new ArrayList<Record>());
+        List<Record> l = table.get(lex);
+        l.add(new Record(token, beginLine, endLine, endColumn, beginColumn));
     }
 
-    public Record getRecord(int token,  int beginLine, int beginColum){
-        List<Record> l = table.get(token);
+    // get record info using lex and position in text
+    public Record getRecord(String lex,  int beginLine, int beginColum){
+        List<Record> l = table.get(lex);
         if (l == null) return null;
         return l.stream().filter((r)-> r.beginColumn == beginColum && r.beginLine == beginLine).findFirst().orElse(null);
     }
@@ -25,15 +27,15 @@ public class SymbolTable {
     // Metodo per stampare la symbol table
     public void printTable() {
         System.out.println("\n\n");
-        System.out.printf("%-20s %-10s %-10s %-10s %-10s %-10s%n", "Kind (token)", "lessema", "ILinea", "FLinea", "IColonna", "FColonna");
+        System.out.printf("%-20s %-10s %-10s %-10s %-10s %-10s%n",  "lessema", "Kind", "ILinea", "FLinea", "IColonna", "FColonna");
         System.out.println("------------------------------------------------------------------------------------------------------------------");
 
-        for (Map.Entry<Integer, List<Record>> entry : table.entrySet()) {
+        for (Map.Entry<String, List<Record>> entry : table.entrySet()) {
             List<Record> records = entry.getValue();
 
             for (Record record : records) {
                 System.out.printf("%-20s %-10s %-10d %-10d %-10d %-10d%n",
-                        entry.getKey(), record.lex, record.beginLine, record.endLine,
+                        entry.getKey(), record.token, record.beginLine, record.endLine,
                         record.beginColumn, record.endColumn); // Rimosso l'ambito dalla stampa
             }
         }
@@ -41,14 +43,14 @@ public class SymbolTable {
 
 
     public class Record {
-        String lex; // lessema
+        int token; // token
         int beginLine; // punto di inizio del lessema nel codice (rispetto alla linea)
         int endLine; // punto di fine lessema nel codice (rispetto alla linea)
         int beginColumn; // punto di inizio lessema nel codice (rispetto alla colonna)
         int endColumn; // punto di fine lessema nel codice (rispetto alla colonna)
 
-        public Record(String lex, int beginLine, int endLine, int endColumn, int beginColumn) {
-            this.lex = lex;
+        public Record(int token, int beginLine, int endLine, int endColumn, int beginColumn) {
+            this.token = token;
             this.beginLine = beginLine;
             this.endLine = endLine;
             this.endColumn = endColumn;
@@ -56,8 +58,8 @@ public class SymbolTable {
         }
 
 
-        public String getLex() {
-            return lex;
+        public int getToken() {
+            return token;
         }
 
         public int getBeginLine() {
