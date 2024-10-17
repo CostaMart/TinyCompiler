@@ -26,20 +26,27 @@ public class SymbolTable {
 
     // Metodo per stampare la symbol table
     public void printTable() {
-        System.out.println("\n\n");
-        System.out.printf("%-20s %-10s %-10s %-10s %-10s %-10s%n",  "lessema", "Kind", "ILinea", "FLinea", "IColonna", "FColonna");
-        System.out.println("------------------------------------------------------------------------------------------------------------------");
-
         for (Map.Entry<String, List<Record>> entry : table.entrySet()) {
             List<Record> records = entry.getValue();
 
+            // Stampa l'intestazione della tabella per ogni entry
+            System.out.println("\n\n");
+            System.out.printf("Tabella per lessema: %s%n", entry.getKey());
+            System.out.printf("%-10s %-10s %-10s %-10s %-10s%n", "token", "ILinea", "FLinea", "IColonna", "FColonna");
+            System.out.println("--------------------------------------------------------------");
+
+            // Stampa i record associati a quella chiave
             for (Record record : records) {
-                System.out.printf("%-20s %-10s %-10d %-10d %-10d %-10d%n",
-                        entry.getKey(), record.token, record.beginLine, record.endLine,
-                        record.beginColumn, record.endColumn); // Rimosso l'ambito dalla stampa
+                System.out.printf("%-10s %-10d %-10d %-10d %-10d%n",
+                        record.token, record.beginLine, record.endLine,
+                        record.beginColumn, record.endColumn);
             }
+
+            System.out.println("--------------------------------------------------------------");
         }
     }
+
+
 
 
     public class Record {
