@@ -26,13 +26,12 @@ public class Tiny {
 
         TinyTokenManager tokenmanager = new TinyTokenManager(new SimpleCharStream(s));
         Token token;
+        if(args.length > 1 && args[1].equals("lexer_mode")){
 
-        while ((token = tokenmanager.getNextToken()).kind != EOF) {
+            while ((token = tokenmanager.getNextToken()).kind != EOF) {
 
             System.out.println("lessema: " + token.image + " --> Token associato: " + tokenImage[token.kind]);
         }
-
-
 
                 System.out.println("N of keys: " + tokenmanager.KEYS);
                 System.out.println("N of CONTROLS: " + tokenmanager.CONTROLS);
@@ -40,8 +39,11 @@ public class Tiny {
                 tokenmanager.symbolTable.printTable();
                 SymbolTable.Record r = tokenmanager.symbolTable.getRecord("then",2,1);
                 if(r != null)  System.out.println("\nricerca di prova " + r.getToken());
-
-
+        }
+        else{
+                Tiny t = new Tiny(s);
+                t.program();
+            }
     }
 
     }
@@ -90,4 +92,45 @@ TOKEN: {
 SKIP : {
     < SKIPPED : [" ", "\t", "\n", "\r"] >
    | <COMMENT: "{" (~["}"])* "}" > {COMMENTS++;}
+}
+
+void program():{}
+{
+    (statement())* <EOF>
+}
+
+void statement():{}
+{
+   call_to_fun()| if_stat() |assignment() | cycle()
+}
+
+
+void call_to_fun():{}
+{
+  (<READFNC>|<WRITEFNC>)(<NUMBER>|<ID>) <SEMICOLON> {System.out.println("funct call at line " + token.beginLine);}
+}
+
+void assignment():{}
+{
+    <ID><ASSIGMENT>expression()<SEMICOLON> {System.out.println("assignment at line " + token.beginLine);}
+}
+
+void expression():{ }
+{
+    (<ID> | <NUMBER>)((<MULT_DIV> | <SUM_DIF>) (<ID> | <NUMBER>))* { System.out.println("expression at line " + token.beginLine + " col " + token.beginColumn ); }
+}
+
+void cycle():{ System.out.println("cycle start at line " + token.next.beginLine);}
+{
+    <REPEAT> (statement())* <UNTIL> condition() <SEMICOLON> {System.out.println("cycle end at line "+ token.beginLine);}
+}
+
+void if_stat():{ if(token.kind == 6) System.out.println("cond start at line" + token.beginLine);  }
+{
+    <IF> condition() <THEN> (statement())* <END> {if(token.kind == 1) System.out.println("cond end at line " + token.beginLine);}
+}
+
+void condition():{if(token.kind == 6)System.out.println("condition start at " + token.beginLine);}
+{
+    (<NUMBER>|<ID>)<COMPARISON>(<NUMBER> | <ID>)
 }
