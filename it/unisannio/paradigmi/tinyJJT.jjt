@@ -141,13 +141,13 @@ void Expression() #Expression : {}
 
 void Condition() #Condition : {}
 {
-    Expression() <COMPARISON> Expression()
+    Expression() Compare() Expression()
    
 }
 
 void MulDivExpr() #MulDivExpr : {}
 {
-    Factor() [<MULT_DIV> MulDivExpr()]
+    Factor() [muldiv() MulDivExpr()]
 }
 
 void Factor() #Factor : {}
@@ -157,11 +157,32 @@ void Factor() #Factor : {}
 
 void IfThen() #IfThen : {}
 {
-    <IF> Condition() <THEN> Statements() [<ELSE> Statements()] <END>
+    <IF> Condition() then() Statements() [<ELSE> Statements()] <END>
 }
 
 void RepeatUntil() #RepeatUntil : {}
 {
     <REPEAT> Statements() <UNTIL> Condition()
-   
+}
+
+// le seguenti regole sono inutili, servono solo perchè senza questi nella stampa non escono i simboli terminali
+
+void then() #THEN_SYMBOL: { }
+{
+  < THEN >
+}
+
+void Compare() #COMPARE_SYMBOL: { }
+{
+  < COMPARISON >
+}
+
+void muldiv() #MULDIV_SYMBOL: { }
+{
+  < MULT_DIV >
+}
+
+void sumDif() #SUMDIF_SYMBOL: { }
+{
+	< SUM_DIF >
 }

@@ -290,7 +290,7 @@ if (jjtc000) {
   jjtree.openNodeScope(jjtn000);
     try {
       Expression();
-      jj_consume_token(COMPARISON);
+      Compare();
       Expression();
     } catch (Throwable jjte000) {
 if (jjtc000) {
@@ -321,7 +321,7 @@ if (jjtc000) {
       Factor();
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case MULT_DIV:{
-        jj_consume_token(MULT_DIV);
+        muldiv();
         MulDivExpr();
         break;
         }
@@ -403,7 +403,7 @@ if (jjtc000) {
     try {
       jj_consume_token(IF);
       Condition();
-      jj_consume_token(THEN);
+      then();
       Statements();
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case ELSE:{
@@ -464,6 +464,60 @@ if (jjtc000) {
 if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
       }
+    }
+}
+
+// le seguenti regole sono inutili, servono solo perchè senza questi nella stampa non escono i simboli terminali
+  final public 
+void then() throws ParseException {/*@bgen(jjtree) THEN_SYMBOL */
+  ASTTHEN_SYMBOL jjtn000 = new ASTTHEN_SYMBOL(JJTTHEN_SYMBOL);
+  boolean jjtc000 = true;
+  jjtree.openNodeScope(jjtn000);
+    try {
+      jj_consume_token(THEN);
+    } finally {
+if (jjtc000) {
+      jjtree.closeNodeScope(jjtn000, true);
+    }
+    }
+}
+
+  final public void Compare() throws ParseException {/*@bgen(jjtree) COMPARE_SYMBOL */
+  ASTCOMPARE_SYMBOL jjtn000 = new ASTCOMPARE_SYMBOL(JJTCOMPARE_SYMBOL);
+  boolean jjtc000 = true;
+  jjtree.openNodeScope(jjtn000);
+    try {
+      jj_consume_token(COMPARISON);
+    } finally {
+if (jjtc000) {
+      jjtree.closeNodeScope(jjtn000, true);
+    }
+    }
+}
+
+  final public void muldiv() throws ParseException {/*@bgen(jjtree) MULDIV_SYMBOL */
+  ASTMULDIV_SYMBOL jjtn000 = new ASTMULDIV_SYMBOL(JJTMULDIV_SYMBOL);
+  boolean jjtc000 = true;
+  jjtree.openNodeScope(jjtn000);
+    try {
+      jj_consume_token(MULT_DIV);
+    } finally {
+if (jjtc000) {
+      jjtree.closeNodeScope(jjtn000, true);
+    }
+    }
+}
+
+  final public void sumDif() throws ParseException {/*@bgen(jjtree) SUMDIF_SYMBOL */
+  ASTSUMDIF_SYMBOL jjtn000 = new ASTSUMDIF_SYMBOL(JJTSUMDIF_SYMBOL);
+  boolean jjtc000 = true;
+  jjtree.openNodeScope(jjtn000);
+    try {
+      jj_consume_token(SUM_DIF);
+    } finally {
+if (jjtc000) {
+            jjtree.closeNodeScope(jjtn000, true);
+          }
     }
 }
 
