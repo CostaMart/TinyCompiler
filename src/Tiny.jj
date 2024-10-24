@@ -67,6 +67,7 @@ TOKEN : {               // with this sintax you can describe an operation to act
   | <IF: "if">                                  { KEYS++; CONTROLS++;   }
   | <REPEAT: "repeat">                          { KEYS++; CONTROLS++;   }
   | <UNTIL: "until">                            { KEYS++;               }
+  | <ELSE: "else">
 }
 
 TOKEN:{
@@ -76,6 +77,8 @@ TOKEN:{
 
 TOKEN:{
    <ASSIGMENT: ":=">                            { KEYS++;              }
+  | <LEF_PAR: "(">
+  | <RIGHT_PAR: ")">
   | <MULT_DIV: ("/"|"*")>                       { KEYS++;              }
   | <SUM_DIF: ("-"|"+")>                        { KEYS++;              }
   | <COMPARISON: ("<"|"="|">")>                 { KEYS++;              }
@@ -91,3 +94,4 @@ SKIP : {
     < SKIPPED : [" ", "\t", "\n", "\r"] >
    | <COMMENT: "{" (~["}"])* "}" > {COMMENTS++;}
 }
+

@@ -1,0 +1,23 @@
+NT=
+Program
+Statement
+CallRead
+CallWrite
+Assignment
+IfThen
+RepeatUntil
+<Statements>
+--
+
+<Program>::= <Statements> EOF
+<Statements>::= <Statement> SEMICOLON <Statements> | <Statement>
+<Statement>::= <CallRead> | <CallWrite> | <Assigment> | <IfThen> | <RepeatUntil>
+<CallWrite>::= WRITE (ID|NUMBER)
+<CalRead>::= READ (ID)
+<Assignment>::= ID ASSIGMENT <Expression>
+<Expression>::= <Expression> SUM_DIF <MulDivExpr> | <MulDivExpr>
+<MulDivExpr>::= <MulDivExpr> MUL_DIV <Factor> | <Factor>
+<Factor>::= ID | NUMBER | (LEF_PAR <Expression> RIGHT_PAR)
+<IfThen>::= IF <Condition> THEN <Statements> [ELSE <Statements>] END
+<Condition>::= <Expression> COMPARISON <Expression>
+<RepeatUntil>::= REPEAT <Statements> UNTIL <Condition>
