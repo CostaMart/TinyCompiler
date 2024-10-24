@@ -26,13 +26,12 @@ public class Tiny {
 
         TinyTokenManager tokenmanager = new TinyTokenManager(new SimpleCharStream(s));
         Token token;
+        if(args.length > 1 && args[1].equals("lexer_mode")){
 
-        while ((token = tokenmanager.getNextToken()).kind != EOF) {
+            while ((token = tokenmanager.getNextToken()).kind != EOF) {
 
             System.out.println("lessema: " + token.image + " --> Token associato: " + tokenImage[token.kind]);
         }
-
-
 
                 System.out.println("N of keys: " + tokenmanager.KEYS);
                 System.out.println("N of CONTROLS: " + tokenmanager.CONTROLS);
@@ -40,8 +39,11 @@ public class Tiny {
                 tokenmanager.symbolTable.printTable();
                 SymbolTable.Record r = tokenmanager.symbolTable.getRecord("then",2,1);
                 if(r != null)  System.out.println("\nricerca di prova " + r.getToken());
-
-
+        }
+        else{
+                Tiny t = new Tiny(s);
+                t.Program();
+            }
     }
 
     }
@@ -100,16 +102,15 @@ void Program(): {}
     Statements()<EOF>
 }
 
-void Statements():{System.out.println("ciao");}
+void Statements():{System.out.println(token.image);}
 {
-    Statement() <SEMICOLON> Statements()
+    Statement() [<SEMICOLON>] [Statements()]
 }
 
 void Statement():{}
 {
-    CallRead() | CallWrite()  | Assignment()  | RepeatUntil()  | IfThen()
+    CallRead() | CallWrite()  | Assignment()  | RepeatUntil() | IfThen()
 }
-
 
 
 void CallRead() : {}
@@ -125,17 +126,37 @@ void CallWrite(): {}
 void Assignment():{}
 {
 <ID> <ASSIGMENT> Expression()
+ {
+            System.out.println("Recognized: assignment");
+            System.out.println("pos " + token.beginLine);
+            System.out.println("col " + token.beginColumn);
+        }
 }
 
-void Expression(): {System.out.println(token.image); System.out.println("ciao");}
+void Expression(): {}
 {
-    MulDivExpr() <SUM_DIF> Expression()
+    MulDivExpr() [<SUM_DIF> Expression()]
 
+    {
+            System.out.println("Recognized: expression");
+            System.out.println("pos " + token.beginLine);
+            System.out.println("col " + token.beginColumn);
+        }
+
+}
+void Condition():{}
+{
+    Expression() <COMPARISON> Expression()
+     {
+                System.out.println("Recognized: condition");
+                System.out.println("pos " + token.beginLine);
+                System.out.println("col " + token.beginColumn);
+            }
 }
 
 void MulDivExpr():{}
 {
-    Factor() <MULT_DIV> MulDivExpr()
+    Factor() [<MULT_DIV> MulDivExpr()]
 }
 
 void Factor():{}
@@ -145,15 +166,12 @@ void Factor():{}
 
 void IfThen():{}
 {
-<IF> Condition() <THEN> Statements() (<ELSE> Statements())+ <END>
+<IF> Condition() <THEN> Statements() [<ELSE> Statements()] <END>
 }
 
-void Condition():{}
-{
-Expression() <COMPARISON> Expression()
-}
 
 void RepeatUntil():{}
 {
 <REPEAT> Statements() <UNTIL> Condition()
+{System.out.println("uscito dal repeat");}
 }
