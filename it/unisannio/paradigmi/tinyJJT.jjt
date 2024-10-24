@@ -1,0 +1,167 @@
+options {
+    STATIC = false;
+    MULTI = true;
+    NODE_DEFAULT_VOID = true;
+    BUILD_PARSER = true;
+    BUILD_NODE_FILES = true;
+}
+
+PARSER_BEGIN(Tiny)
+
+package it.unisannio.paradigmi;
+import it.unisannio.symbolTable.*;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.FileNotFoundException;
+
+public class Tiny {
+    public static void main(String[] args) throws ParseException, FileNotFoundException {
+        InputStream s;
+        if (args.length > 0) {
+            s = new FileInputStream(args[0]);
+        } else {
+            s = System.in;
+        }
+
+        Tiny t = new Tiny(s);
+        SimpleNode n = t.Program();
+
+        printTree(n,"",true);
+        
+    }
+
+
+      public static void printTree(SimpleNode node, String prefix, boolean isTail) {
+        if (node == null) {
+            return;
+        }
+
+        // Stampa il nodo corrente
+        System.out.print(prefix);
+        System.out.print(isTail ? "└── " : "├── ");
+        System.out.println(node.toString()); // Personalizza per il tuo nodo
+
+        // Costruisci il nuovo prefisso per i figli
+        prefix += isTail ? "    " : "│   ";
+
+        // Visita i figli del nodo
+        for (int i = 0; i < node.jjtGetNumChildren(); i++) {
+            SimpleNode child = (SimpleNode) node.jjtGetChild(i);
+            printTree(child, prefix, i == node.jjtGetNumChildren() - 1);
+        }
+    }
+    
+}
+
+PARSER_END(Tiny)
+
+// Dichiarazioni del gestore di token
+TOKEN_MGR_DECLS : {
+    int KEYS = 0;
+    int CONTROLS = 0;
+    int COMMENTS = 0;
+    SymbolTable symbolTable = new SymbolTable();
+}
+
+// Definizione dei token
+TOKEN : {
+    <END: "end">                                 { KEYS++; }
+  | <READFNC: "read">                           { KEYS++; }
+  | <WRITEFNC: "write">                         { KEYS++; }
+  | <SEMICOLON: ";">                            { KEYS++; }
+  | <THEN: "then">                              { KEYS++; }
+  | <IF: "if">                                  { KEYS++; CONTROLS++; }
+  | <REPEAT: "repeat">                          { KEYS++; CONTROLS++; }
+  | <UNTIL: "until">                            { KEYS++; }
+  | <ELSE: "else">
+}
+
+TOKEN : {
+  <NUMBER: (<NUMBA>)+>                          { KEYS++; }
+  | <ID: <LETTER>(<LETTER> | <NUMBA> | "_" )*>  { KEYS++; symbolTable.put(matchedToken.image, matchedToken.kind, matchedToken.beginLine, matchedToken.endLine, matchedToken.beginColumn, matchedToken.endColumn); }
+}
+
+TOKEN : {
+   <ASSIGMENT: ":=">                            { KEYS++; }
+  | <LEF_BRA: "(">
+  | <RIGHT_BRA: ")">
+  | <MULT_DIV: ("/"|"*")>                       { KEYS++; }
+  | <SUM_DIF: ("-"|"+")>                        { KEYS++; }
+  | <COMPARISON: ("<"|"="|">")>                 { KEYS++; }
+}
+
+TOKEN : {
+  <#NUMBA: (["0"-"9"])>
+  | <#LETTER: (["A"-"Z","a"-"z"])>
+}
+
+SKIP : {
+    < SKIPPED : [" ", "\t", "\n", "\r"] >
+   | <COMMENT: "{" (~["}"])* "}" > { COMMENTS++; }
+}
+
+// Definizione delle regole sintattiche con nodi per l'AST
+SimpleNode Program() #Program : {}
+{
+    Statements() <EOF>
+    { return jjtThis; }
+}
+
+void Statements() #Statements : {}
+{
+    Statement() [<SEMICOLON>] [Statements()]
+}
+
+void Statement() #Statement : {}
+{
+    CallRead() | CallWrite() | Assignment() | RepeatUntil() | IfThen()
+}
+
+void CallRead() #CallRead : {}
+{
+    <READFNC> <ID>
+}
+
+void CallWrite() #CallWrite : {}
+{
+    <WRITEFNC> (<ID>|<NUMBER>)
+}
+
+void Assignment() #Assignment : {}
+{
+    <ID> <ASSIGMENT> Expression()
+   
+}
+
+void Expression() #Expression : {}
+{
+    MulDivExpr() [<SUM_DIF> Expression()]
+    
+}
+
+void Condition() #Condition : {}
+{
+    Expression() <COMPARISON> Expression()
+   
+}
+
+void MulDivExpr() #MulDivExpr : {}
+{
+    Factor() [<MULT_DIV> MulDivExpr()]
+}
+
+void Factor() #Factor : {}
+{
+    <ID> | <NUMBER> | <LEF_BRA> Expression() <RIGHT_BRA>
+}
+
+void IfThen() #IfThen : {}
+{
+    <IF> Condition() <THEN> Statements() [<ELSE> Statements()] <END>
+}
+
+void RepeatUntil() #RepeatUntil : {}
+{
+    <REPEAT> Statements() <UNTIL> Condition()
+   
+}

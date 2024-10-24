@@ -1,4 +1,4 @@
-package it.unisannio.paradigmi.symbolTable;
+package it.unisannio.symbolTable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
