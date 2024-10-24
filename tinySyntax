@@ -15,8 +15,8 @@ RepeatUntil
 <CallWrite>::= WRITE (ID|NUMBER)
 <CalRead>::= READ (ID)
 <Assignment>::= ID ASSIGMENT <Expression>
-<Expression>::= <Expression> SUM_DIF <MulDivExpr> | <MulDivExpr>
-<MulDivExpr>::= <MulDivExpr> MUL_DIV <Factor> | <Factor>
+<Expression>::= <MulDivExpr> SUM_DIF <Expression> | <MulDivExpr>
+<MulDivExpr>::= <Factor> MUL_DIV <MulDivExpr>  | <Factor>
 <Factor>::= ID | NUMBER | (LEF_PAR <Expression> RIGHT_PAR)
 <IfThen>::= IF <Condition> THEN <Statements> [ELSE <Statements>] END
 <Condition>::= <Expression> COMPARISON <Expression>

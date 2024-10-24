@@ -77,8 +77,8 @@ TOKEN:{
 
 TOKEN:{
    <ASSIGMENT: ":=">                            { KEYS++;              }
-  | <LEF_PAR: "(">
-  | <RIGHT_PAR: ")">
+  | <LEF_BRA: "(">
+  | <RIGHT_BRA: ")">
   | <MULT_DIV: ("/"|"*")>                       { KEYS++;              }
   | <SUM_DIF: ("-"|"+")>                        { KEYS++;              }
   | <COMPARISON: ("<"|"="|">")>                 { KEYS++;              }
@@ -95,3 +95,65 @@ SKIP : {
    | <COMMENT: "{" (~["}"])* "}" > {COMMENTS++;}
 }
 
+void Program(): {}
+{
+    Statements()<EOF>
+}
+
+void Statements():{System.out.println("ciao");}
+{
+    Statement() <SEMICOLON> Statements()
+}
+
+void Statement():{}
+{
+    CallRead() | CallWrite()  | Assignment()  | RepeatUntil()  | IfThen()
+}
+
+
+
+void CallRead() : {}
+{
+<READFNC> <ID>
+}
+
+void CallWrite(): {}
+{
+<WRITEFNC> (<ID>|<NUMBER>)
+}
+
+void Assignment():{}
+{
+<ID> <ASSIGMENT> Expression()
+}
+
+void Expression(): {System.out.println(token.image); System.out.println("ciao");}
+{
+    MulDivExpr() <SUM_DIF> Expression()
+
+}
+
+void MulDivExpr():{}
+{
+    Factor() <MULT_DIV> MulDivExpr()
+}
+
+void Factor():{}
+{
+    <ID> | <NUMBER> | <LEF_BRA> Expression() <RIGHT_BRA>
+}
+
+void IfThen():{}
+{
+<IF> Condition() <THEN> Statements() (<ELSE> Statements())+ <END>
+}
+
+void Condition():{}
+{
+Expression() <COMPARISON> Expression()
+}
+
+void RepeatUntil():{}
+{
+<REPEAT> Statements() <UNTIL> Condition()
+}
