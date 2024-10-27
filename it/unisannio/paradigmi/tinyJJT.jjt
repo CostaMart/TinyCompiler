@@ -25,13 +25,13 @@ public class Tiny {
 
         Tiny t = new Tiny(s);
         SimpleNode n = t.Program();
-
+		System.out.println("Normally we read AST from left to right. In this representation we go from up to bottom \n\n");
         printTree(n,"",true);
         
     }
 
 
-      public static void printTree(SimpleNode node, String prefix, boolean isTail) {
+      public static void printTree(SimpleNode node, String prefix, boolean isTail) { 
         if (node == null) {
             return;
         }
@@ -39,8 +39,11 @@ public class Tiny {
         // Stampa il nodo corrente
         System.out.print(prefix);
         System.out.print(isTail ? "└── " : "├── ");
-        System.out.println(node.toString()); // Personalizza per il tuo nodo
-
+        if(node.value != null)
+        System.out.println(node.toString()+ " "+ node.value); 
+		else
+		System.out.println(node.toString());
+		
         // Costruisci il nuovo prefisso per i figli
         prefix += isTail ? "    " : "│   ";
 
@@ -129,30 +132,29 @@ void CallWrite() #CallWrite : {}
 
 void Assignment() #Assignment : {}
 {
-    <ID> <ASSIGMENT> Expression()
-   
+    <ID> <ASSIGMENT> Expression()   
 }
 
 void Expression() #Expression : {}
 {
-    MulDivExpr() [<SUM_DIF> Expression()]
-    
+	MulDivExpr() (sumDif() MulDivExpr())*
 }
+
+
 
 void Condition() #Condition : {}
 {
     Expression() Compare() Expression()
-   
 }
 
 void MulDivExpr() #MulDivExpr : {}
 {
-    Factor() [muldiv() MulDivExpr()]
+    Factor() (muldiv() Factor())*
 }
 
-void Factor() #Factor : {}
+void Factor() #Factor : { }
 {
-    <ID> | <NUMBER> | <LEF_BRA> Expression() <RIGHT_BRA>
+    ID() | <NUMBER> | <LEF_BRA> Expression() <RIGHT_BRA>
 }
 
 void IfThen() #IfThen : {}
@@ -165,7 +167,14 @@ void RepeatUntil() #RepeatUntil : {}
     <REPEAT> Statements() <UNTIL> Condition()
 }
 
+
+
 // le seguenti regole sono inutili, servono solo perchè senza questi nella stampa non escono i simboli terminali
+
+void ID() #ID_SYMBOL: { }
+{
+  < ID >
+}
 
 void then() #THEN_SYMBOL: { }
 {
@@ -186,3 +195,4 @@ void sumDif() #SUMDIF_SYMBOL: { }
 {
 	< SUM_DIF >
 }
+

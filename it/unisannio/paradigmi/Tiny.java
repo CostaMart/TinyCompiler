@@ -17,7 +17,7 @@ public class Tiny/*@bgen(jjtree)*/implements TinyTreeConstants, TinyConstants {/
 
         Tiny t = new Tiny(s);
         SimpleNode n = t.Program();
-
+                System.out.println("Normally we read AST from left to right. In this representation we go from up to bottom \n\n");
         printTree(n,"",true);
 
     }
@@ -31,7 +31,10 @@ public class Tiny/*@bgen(jjtree)*/implements TinyTreeConstants, TinyConstants {/
         // Stampa il nodo corrente
         System.out.print(prefix);
         System.out.print(isTail ? "\u2514\u2500\u2500 " : "\u251c\u2500\u2500 ");
-        System.out.println(node.toString()); // Personalizza per il tuo nodo
+        if(node.value != null)
+        System.out.println(node.toString()+ " "+ node.value);
+                else
+                System.out.println(node.toString());
 
         // Costruisci il nuovo prefisso per i figli
         prefix += isTail ? "    " : "\u2502   ";
@@ -253,34 +256,38 @@ if (jjtc000) {
   jjtree.openNodeScope(jjtn000);
     try {
       MulDivExpr();
-      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case SUM_DIF:{
-        jj_consume_token(SUM_DIF);
-        Expression();
-        break;
+      label_1:
+      while (true) {
+        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+        case SUM_DIF:{
+          ;
+          break;
+          }
+        default:
+          jj_la1[4] = jj_gen;
+          break label_1;
         }
-      default:
-        jj_la1[4] = jj_gen;
-        ;
+        sumDif();
+        MulDivExpr();
       }
     } catch (Throwable jjte000) {
 if (jjtc000) {
-        jjtree.clearNodeScope(jjtn000);
-        jjtc000 = false;
-      } else {
-        jjtree.popNode();
-      }
-      if (jjte000 instanceof RuntimeException) {
-        {if (true) throw (RuntimeException)jjte000;}
-      }
-      if (jjte000 instanceof ParseException) {
-        {if (true) throw (ParseException)jjte000;}
-      }
-      {if (true) throw (Error)jjte000;}
+            jjtree.clearNodeScope(jjtn000);
+            jjtc000 = false;
+          } else {
+            jjtree.popNode();
+          }
+          if (jjte000 instanceof RuntimeException) {
+            {if (true) throw (RuntimeException)jjte000;}
+          }
+          if (jjte000 instanceof ParseException) {
+            {if (true) throw (ParseException)jjte000;}
+          }
+          {if (true) throw (Error)jjte000;}
     } finally {
 if (jjtc000) {
-        jjtree.closeNodeScope(jjtn000, true);
-      }
+            jjtree.closeNodeScope(jjtn000, true);
+          }
     }
 }
 
@@ -319,15 +326,19 @@ if (jjtc000) {
   jjtree.openNodeScope(jjtn000);
     try {
       Factor();
-      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case MULT_DIV:{
-        muldiv();
-        MulDivExpr();
-        break;
+      label_2:
+      while (true) {
+        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+        case MULT_DIV:{
+          ;
+          break;
+          }
+        default:
+          jj_la1[5] = jj_gen;
+          break label_2;
         }
-      default:
-        jj_la1[5] = jj_gen;
-        ;
+        muldiv();
+        Factor();
       }
     } catch (Throwable jjte000) {
 if (jjtc000) {
@@ -357,7 +368,7 @@ if (jjtc000) {
     try {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case ID:{
-        jj_consume_token(ID);
+        ID();
         break;
         }
       case NUMBER:{
@@ -469,7 +480,20 @@ if (jjtc000) {
 
 // le seguenti regole sono inutili, servono solo perchè senza questi nella stampa non escono i simboli terminali
   final public 
-void then() throws ParseException {/*@bgen(jjtree) THEN_SYMBOL */
+void ID() throws ParseException {/*@bgen(jjtree) ID_SYMBOL */
+  ASTID_SYMBOL jjtn000 = new ASTID_SYMBOL(JJTID_SYMBOL);
+  boolean jjtc000 = true;
+  jjtree.openNodeScope(jjtn000);
+    try {
+      jj_consume_token(ID);
+    } finally {
+if (jjtc000) {
+      jjtree.closeNodeScope(jjtn000, true);
+    }
+    }
+}
+
+  final public void then() throws ParseException {/*@bgen(jjtree) THEN_SYMBOL */
   ASTTHEN_SYMBOL jjtn000 = new ASTTHEN_SYMBOL(JJTTHEN_SYMBOL);
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);

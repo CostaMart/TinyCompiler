@@ -15,10 +15,11 @@ public interface TinyTreeConstants
   public int JJTFACTOR = 9;
   public int JJTIFTHEN = 10;
   public int JJTREPEATUNTIL = 11;
-  public int JJTTHEN_SYMBOL = 12;
-  public int JJTCOMPARE_SYMBOL = 13;
-  public int JJTMULDIV_SYMBOL = 14;
-  public int JJTSUMDIF_SYMBOL = 15;
+  public int JJTID_SYMBOL = 12;
+  public int JJTTHEN_SYMBOL = 13;
+  public int JJTCOMPARE_SYMBOL = 14;
+  public int JJTMULDIV_SYMBOL = 15;
+  public int JJTSUMDIF_SYMBOL = 16;
 
 
   public String[] jjtNodeName = {
@@ -34,10 +35,11 @@ public interface TinyTreeConstants
     "Factor",
     "IfThen",
     "RepeatUntil",
+    "ID_SYMBOL",
     "THEN_SYMBOL",
     "COMPARE_SYMBOL",
     "MULDIV_SYMBOL",
     "SUMDIF_SYMBOL",
   };
 }
-/* JavaCC - OriginalChecksum=9e2b7a73cb8cd72964c74bdee3a757fd (do not edit this line) */
+/* JavaCC - OriginalChecksum=7086c65a122c18a229c4ed65a8e1f81f (do not edit this line) */
