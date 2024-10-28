@@ -8,6 +8,9 @@ import java.io.FileNotFoundException;
 
 public class Tiny/*@bgen(jjtree)*/implements TinyTreeConstants, TinyConstants {/*@bgen(jjtree)*/
   protected JJTTinyState jjtree = new JJTTinyState();public static void main(String[] args) throws ParseException, FileNotFoundException {
+
+
+
         InputStream s;
         if (args.length > 0) {
             s = new FileInputStream(args[0]);
@@ -24,7 +27,10 @@ public class Tiny/*@bgen(jjtree)*/implements TinyTreeConstants, TinyConstants {/
 
 
       public static void printTree(SimpleNode node, String prefix, boolean isTail) {
-        if (node == null) {
+                String GREEN = "\u001b[32m";
+                String RESET = "\u001b[0m";
+
+                if (node == null) {
             return;
         }
 
@@ -32,7 +38,7 @@ public class Tiny/*@bgen(jjtree)*/implements TinyTreeConstants, TinyConstants {/
         System.out.print(prefix);
         System.out.print(isTail ? "\u2514\u2500\u2500 " : "\u251c\u2500\u2500 ");
         if(node.value != null)
-        System.out.println(node.toString()+ " "+ node.value);
+        System.out.println(node.toString()+ ": "+ GREEN + node.value +RESET);
                 else
                 System.out.println(node.toString());
 
@@ -267,7 +273,7 @@ if (jjtc000) {
           jj_la1[4] = jj_gen;
           break label_1;
         }
-        sumDif();
+        jj_consume_token(SUM_DIF);
         MulDivExpr();
       }
     } catch (Throwable jjte000) {
@@ -297,7 +303,7 @@ if (jjtc000) {
   jjtree.openNodeScope(jjtn000);
     try {
       Expression();
-      Compare();
+      jj_consume_token(COMPARISON);
       Expression();
     } catch (Throwable jjte000) {
 if (jjtc000) {
@@ -337,7 +343,7 @@ if (jjtc000) {
           jj_la1[5] = jj_gen;
           break label_2;
         }
-        muldiv();
+        jj_consume_token(MULT_DIV);
         Factor();
       }
     } catch (Throwable jjte000) {
@@ -368,11 +374,17 @@ if (jjtc000) {
     try {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case ID:{
-        ID();
+        jj_consume_token(ID);
+jjtree.closeNodeScope(jjtn000, true);
+             jjtc000 = false;
+jjtn000.value = token.image;
         break;
         }
       case NUMBER:{
         jj_consume_token(NUMBER);
+jjtree.closeNodeScope(jjtn000, true);
+                                                        jjtc000 = false;
+jjtn000.value = token.image;
         break;
         }
       case LEF_BRA:{
@@ -414,7 +426,7 @@ if (jjtc000) {
     try {
       jj_consume_token(IF);
       Condition();
-      then();
+      jj_consume_token(THEN);
       Statements();
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case ELSE:{
@@ -475,73 +487,6 @@ if (jjtc000) {
 if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
       }
-    }
-}
-
-// le seguenti regole sono inutili, servono solo perchè senza questi nella stampa non escono i simboli terminali
-  final public 
-void ID() throws ParseException {/*@bgen(jjtree) ID_SYMBOL */
-  ASTID_SYMBOL jjtn000 = new ASTID_SYMBOL(JJTID_SYMBOL);
-  boolean jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);
-    try {
-      jj_consume_token(ID);
-    } finally {
-if (jjtc000) {
-      jjtree.closeNodeScope(jjtn000, true);
-    }
-    }
-}
-
-  final public void then() throws ParseException {/*@bgen(jjtree) THEN_SYMBOL */
-  ASTTHEN_SYMBOL jjtn000 = new ASTTHEN_SYMBOL(JJTTHEN_SYMBOL);
-  boolean jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);
-    try {
-      jj_consume_token(THEN);
-    } finally {
-if (jjtc000) {
-      jjtree.closeNodeScope(jjtn000, true);
-    }
-    }
-}
-
-  final public void Compare() throws ParseException {/*@bgen(jjtree) COMPARE_SYMBOL */
-  ASTCOMPARE_SYMBOL jjtn000 = new ASTCOMPARE_SYMBOL(JJTCOMPARE_SYMBOL);
-  boolean jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);
-    try {
-      jj_consume_token(COMPARISON);
-    } finally {
-if (jjtc000) {
-      jjtree.closeNodeScope(jjtn000, true);
-    }
-    }
-}
-
-  final public void muldiv() throws ParseException {/*@bgen(jjtree) MULDIV_SYMBOL */
-  ASTMULDIV_SYMBOL jjtn000 = new ASTMULDIV_SYMBOL(JJTMULDIV_SYMBOL);
-  boolean jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);
-    try {
-      jj_consume_token(MULT_DIV);
-    } finally {
-if (jjtc000) {
-      jjtree.closeNodeScope(jjtn000, true);
-    }
-    }
-}
-
-  final public void sumDif() throws ParseException {/*@bgen(jjtree) SUMDIF_SYMBOL */
-  ASTSUMDIF_SYMBOL jjtn000 = new ASTSUMDIF_SYMBOL(JJTSUMDIF_SYMBOL);
-  boolean jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);
-    try {
-      jj_consume_token(SUM_DIF);
-    } finally {
-if (jjtc000) {
-            jjtree.closeNodeScope(jjtn000, true);
-          }
     }
 }
 

@@ -16,6 +16,9 @@ import java.io.FileNotFoundException;
 
 public class Tiny {
     public static void main(String[] args) throws ParseException, FileNotFoundException {
+
+      
+
         InputStream s;
         if (args.length > 0) {
             s = new FileInputStream(args[0]);
@@ -32,7 +35,10 @@ public class Tiny {
 
 
       public static void printTree(SimpleNode node, String prefix, boolean isTail) { 
-        if (node == null) {
+		String GREEN = "\u001B[32m";       
+		String RESET = "\u001B[0m";
+		
+		if (node == null) {
             return;
         }
 
@@ -40,7 +46,7 @@ public class Tiny {
         System.out.print(prefix);
         System.out.print(isTail ? "└── " : "├── ");
         if(node.value != null)
-        System.out.println(node.toString()+ " "+ node.value); 
+        System.out.println(node.toString()+ ": "+ GREEN + node.value +RESET); 
 		else
 		System.out.println(node.toString());
 		
@@ -137,29 +143,30 @@ void Assignment() #Assignment : {}
 
 void Expression() #Expression : {}
 {
-	MulDivExpr() (sumDif() MulDivExpr())*
+	MulDivExpr() (< SUM_DIF > MulDivExpr())*
 }
 
 
 
 void Condition() #Condition : {}
 {
-    Expression() Compare() Expression()
+    Expression() < COMPARISON > Expression()
 }
 
 void MulDivExpr() #MulDivExpr : {}
 {
-    Factor() (muldiv() Factor())*
+    Factor() (< MULT_DIV > Factor())*
 }
 
 void Factor() #Factor : { }
 {
-    ID() | <NUMBER> | <LEF_BRA> Expression() <RIGHT_BRA>
+    < ID > { jjtn000.value = token.image;} | <NUMBER> { jjtn000.value = token.image;} | <LEF_BRA> Expression() <RIGHT_BRA>
+
 }
 
 void IfThen() #IfThen : {}
 {
-    <IF> Condition() then() Statements() [<ELSE> Statements()] <END>
+    <IF> Condition() < THEN > Statements() [<ELSE> Statements()] <END>
 }
 
 void RepeatUntil() #RepeatUntil : {}
@@ -168,31 +175,4 @@ void RepeatUntil() #RepeatUntil : {}
 }
 
 
-
-// le seguenti regole sono inutili, servono solo perchè senza questi nella stampa non escono i simboli terminali
-
-void ID() #ID_SYMBOL: { }
-{
-  < ID >
-}
-
-void then() #THEN_SYMBOL: { }
-{
-  < THEN >
-}
-
-void Compare() #COMPARE_SYMBOL: { }
-{
-  < COMPARISON >
-}
-
-void muldiv() #MULDIV_SYMBOL: { }
-{
-  < MULT_DIV >
-}
-
-void sumDif() #SUMDIF_SYMBOL: { }
-{
-	< SUM_DIF >
-}
 
