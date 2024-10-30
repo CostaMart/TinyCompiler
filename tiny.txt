@@ -3,9 +3,9 @@ read x; { input an integer }
 if 0<x then { dont compute if x<=0 }
 fact:=1;
 repeat
-fact:=fact/2+43+12;
+fact:=fact/(2+1+3)+43+12;
 x := x-(1+1);
-x := 1+4-23;
+x := 1+4*23;
 until x=0;
 write fact; {output factorial of x}
 end

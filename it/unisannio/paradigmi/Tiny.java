@@ -274,6 +274,7 @@ if (jjtc000) {
           break label_1;
         }
         jj_consume_token(SUM_DIF);
+jjtn000.value = token.image;
         MulDivExpr();
       }
     } catch (Throwable jjte000) {
@@ -344,6 +345,7 @@ if (jjtc000) {
           break label_2;
         }
         jj_consume_token(MULT_DIV);
+jjtn000.value = token.image;
         Factor();
       }
     } catch (Throwable jjte000) {
