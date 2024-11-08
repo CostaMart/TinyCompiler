@@ -118,7 +118,7 @@ SimpleNode Program() #Program : {}
 
 void Statements() #Statements : {}
 {
-    Statement() [<SEMICOLON>] [Statements()]
+    Statement()  [Statements()]
 }
 
 void Statement() #Statement : {}
@@ -128,25 +128,23 @@ void Statement() #Statement : {}
 
 void CallRead() #CallRead : {}
 {
-    <READFNC> <ID>
+    <READFNC> <ID> <SEMICOLON>
 }
 
 void CallWrite() #CallWrite : {}
 {
-    <WRITEFNC> (<ID>|<NUMBER>)
+    <WRITEFNC> (<ID>|<NUMBER>) < SEMICOLON>
 }
 
 void Assignment() #Assignment : {}
 {
-    <ID> <ASSIGMENT> Expression()   
+    <ID> <ASSIGMENT> Expression() < SEMICOLON>   
 }
 
 void Expression() #Expression : {}
 {
 	MulDivExpr() (< SUM_DIF > { jjtn000.value = token.image;} MulDivExpr())*
 }
-
-
 
 void Condition() #Condition : {}
 {
@@ -160,7 +158,7 @@ void MulDivExpr() #MulDivExpr : {}
 
 void Factor() #Factor : { }
 {
-    < ID > { jjtn000.value = token.image;} | <NUMBER> { jjtn000.value = token.image;} | <LEF_BRA> Expression() <RIGHT_BRA>
+     < ID > { jjtn000.value = token.image;} | [<SUM_DIF >] <NUMBER> { jjtn000.value = token.image;} | <LEF_BRA> Expression() <RIGHT_BRA>
 
 }
 

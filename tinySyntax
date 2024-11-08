@@ -15,8 +15,13 @@ RepeatUntil
 <CallWrite>::= WRITE (ID|NUMBER)
 <CalRead>::= READ (ID)
 <Assignment>::= ID ASSIGMENT <Expression>
-<Expression>::= <Expression> SUM_DIF <MulDivExpr> | <MulDivExpr> 	CAMBIATA PER ADATTARSI A JAVACC
-<MulDivExpr>::= <MulDivExpr> MUL_DIV <Factor> | <Factor>		CAMBIATA PER ADATTARSI A JAVACC
+
+<Expression>::= <MulDivExpr> <ExpressionSum> 
+<ExpressionExt>::= SUM_DIF <MulDivExpr> <ExpressionSum> | epsilon
+
+<MulDivExpr>::= <Factor> <MulDivExprExt>
+<MulDivExprExt>::= MUL_DIV <Factor> <MulDivExprExt> | epsilon		
+
 <Factor>::= ID | NUMBER | (LEF_PAR <Expression> RIGHT_PAR)
 <IfThen>::= IF <Condition> THEN <Statements> [ELSE <Statements>] END
 <Condition>::= <Expression> COMPARISON <Expression>
