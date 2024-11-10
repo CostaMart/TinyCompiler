@@ -1,5 +1,6 @@
 # Tiny Compiler
 In our course of "paradigm e linguaggi di programmazione" at University of Sannio we are developing a compiler for "TinyLanguage".
+We are not exactly following the official specification for the language, so, following, you can find the rules we adopted.
 
 ## Javaccc (java compiler compiler compilator)
 a simple script to make the compilation faster (requires Javacc to be in your path).
