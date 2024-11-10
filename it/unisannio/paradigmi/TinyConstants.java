@@ -33,7 +33,7 @@ public interface TinyConstants {
   /** RegularExpression Id. */
   int ID = 11;
   /** RegularExpression Id. */
-  int ASSIGMENT = 12;
+  int ASSIGNMENT = 12;
   /** RegularExpression Id. */
   int LEF_BRA = 13;
   /** RegularExpression Id. */
@@ -45,13 +45,15 @@ public interface TinyConstants {
   /** RegularExpression Id. */
   int COMPARISON = 17;
   /** RegularExpression Id. */
-  int NUMBA = 18;
+  int NEWLINE = 18;
   /** RegularExpression Id. */
-  int LETTER = 19;
+  int NUMBA = 19;
   /** RegularExpression Id. */
-  int SKIPPED = 20;
+  int LETTER = 20;
   /** RegularExpression Id. */
-  int COMMENT = 21;
+  int SKIPPED = 21;
+  /** RegularExpression Id. */
+  int COMMENT = 22;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -76,6 +78,7 @@ public interface TinyConstants {
     "<MULT_DIV>",
     "<SUM_DIF>",
     "<COMPARISON>",
+    "\"\\n\"",
     "<NUMBA>",
     "<LETTER>",
     "<SKIPPED>",

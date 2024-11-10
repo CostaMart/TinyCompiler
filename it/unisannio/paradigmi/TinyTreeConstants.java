@@ -3,21 +3,26 @@ package it.unisannio.paradigmi;
 
 public interface TinyTreeConstants
 {
-  public int JJTPROGRAM = 0;
-  public int JJTSTATEMENTS = 1;
-  public int JJTSTATEMENT = 2;
-  public int JJTCALLREAD = 3;
-  public int JJTCALLWRITE = 4;
-  public int JJTASSIGNMENT = 5;
-  public int JJTEXPRESSION = 6;
-  public int JJTCONDITION = 7;
-  public int JJTMULDIVEXPR = 8;
-  public int JJTFACTOR = 9;
-  public int JJTIFTHEN = 10;
-  public int JJTREPEATUNTIL = 11;
+  public int JJTVOID = 0;
+  public int JJTPROGRAM = 1;
+  public int JJTSTATEMENTS = 2;
+  public int JJTSTATEMENT = 3;
+  public int JJTCALLREAD = 4;
+  public int JJTCALLWRITE = 5;
+  public int JJTASSIGNMENT = 6;
+  public int JJTEXPRESSION = 7;
+  public int JJTEXPRESSIONEXT = 8;
+  public int JJTCONDITION = 9;
+  public int JJTMULDIVEXPR = 10;
+  public int JJTMULDIVEXPREXT = 11;
+  public int JJTFACTOR = 12;
+  public int JJTIFTHEN = 13;
+  public int JJTREPEATUNTIL = 14;
+  public int JJTSUMDIF = 15;
 
 
   public String[] jjtNodeName = {
+    "void",
     "Program",
     "Statements",
     "Statement",
@@ -25,11 +30,14 @@ public interface TinyTreeConstants
     "CallWrite",
     "Assignment",
     "Expression",
+    "ExpressionExt",
     "Condition",
     "MulDivExpr",
+    "MulDivExprExt",
     "Factor",
     "IfThen",
     "RepeatUntil",
+    "sumDif",
   };
 }
-/* JavaCC - OriginalChecksum=b50127714a23fd976223ebd8c169cfac (do not edit this line) */
+/* JavaCC - OriginalChecksum=eb0fa3d4a7d297e2f1211b6381c619c0 (do not edit this line) */

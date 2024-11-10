@@ -75,3 +75,13 @@
 /TinyConstants.java
 /TinyTokenManager.java
 /TinyTreeConstants.java
+/ASTExpressionExt.java
+/ASTExpressionExt.class
+/ASTExoressionExt.java
+/ASTExoressionExt.class
+/ASTMulDivExprExt.class
+/ASTMulDivExprExt.java
+/ASTsumDif.class
+/ASTsumDif.java
+/Tiny$JJCalls.class
+/Tiny$LookaheadSuccess.class

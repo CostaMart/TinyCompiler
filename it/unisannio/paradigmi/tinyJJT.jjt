@@ -15,6 +15,9 @@ import java.io.InputStream;
 import java.io.FileNotFoundException;
 
 public class Tiny {
+  
+  final private int SKIP_ONE = -1;
+
     public static void main(String[] args) throws ParseException, FileNotFoundException {
 
       
@@ -59,13 +62,16 @@ public class Tiny {
             printTree(child, prefix, i == node.jjtGetNumChildren() - 1);
         }
     }
+
     
+			    
 }
 
 PARSER_END(Tiny)
 
 // Dichiarazioni del gestore di token
 TOKEN_MGR_DECLS : {
+  	
     int KEYS = 0;
     int CONTROLS = 0;
     int COMMENTS = 0;
@@ -91,12 +97,13 @@ TOKEN : {
 }
 
 TOKEN : {
-   <ASSIGMENT: ":=">                            { KEYS++; }
+   <ASSIGNMENT: ":=">                            { KEYS++; }
   | <LEF_BRA: "(">
   | <RIGHT_BRA: ")">
   | <MULT_DIV: ("/"|"*")>                       { KEYS++; }
   | <SUM_DIF: ("-"|"+")>                        { KEYS++; }
   | <COMPARISON: ("<"|"="|">")>                 { KEYS++; }
+  | < NEWLINE: "\n" >                           { KEYS++; }
 }
 
 TOKEN : {
@@ -105,16 +112,65 @@ TOKEN : {
 }
 
 SKIP : {
-    < SKIPPED : [" ", "\t", "\n", "\r"] >
+    < SKIPPED : [" ", "\t", "\r"]>
    | <COMMENT: "{" (~["}"])* "}" > { COMMENTS++; }
 }
+
+
+//  error management methods --------------------------
+
+JAVACODE // this function recovers form error in panic mode fashion, by skipping tokens until a synchronization point is found
+void error_skip(int kind) {
+	ParseException e = generateParseException();
+	Token t = new Token();
+	boolean first = true;
+	int next = 0;
+	
+			while (true){
+				next++;
+				// make the token advance without moving the pointer
+				t = getToken(next);
+	            Token advancing = new Token();
+
+				// once a synchronization point is found make the pointer advance
+				if(kind == SKIP_ONE || t.kind == kind || t.kind == NEWLINE || t.kind == EOF) {
+
+	                for (int i = 0; i < next-1; i++) {
+	                  advancing = getNextToken();
+	                  }
+	                  
+	                int	  startC = t.beginColumn;
+					int  startL = t.beginLine;
+					
+					System.err.println(e.toString());
+					System.err.println("ERROR RECOVERED with panic mode");
+					System.err.println("ignoring from: Column - "  + startC + " Row - " + startL  + "\nto: Column - " +  t.beginColumn + " Row - " + t.beginLine );
+					return;
+			  }
+		}
+}
+
+
+
+
+JAVACODE
+void condition_error() {
+		System.err.println("bad formatted condition at row: " + token.beginLine );
+	}
+// -----------------------------	
+
+
+
 
 // Definizione delle regole sintattiche con nodi per l'AST
 SimpleNode Program() #Program : {}
 {
-    Statements() <EOF>
+ 
+   (< NEWLINE >)+ Statements() <EOF>
     { return jjtThis; }
+ 
 }
+
 
 void Statements() #Statements : {}
 {
@@ -123,7 +179,9 @@ void Statements() #Statements : {}
 
 void Statement() #Statement : {}
 {
-    CallRead() | CallWrite() | Assignment() | RepeatUntil() | IfThen()
+
+   (CallRead() | CallWrite() | Assignment() | RepeatUntil() | IfThen()) [<NEWLINE>]
+
 }
 
 void CallRead() #CallRead : {}
@@ -133,44 +191,79 @@ void CallRead() #CallRead : {}
 
 void CallWrite() #CallWrite : {}
 {
-    <WRITEFNC> (<ID>|<NUMBER>) < SEMICOLON>
+    <WRITEFNC> (<ID>|<NUMBER>) <SEMICOLON> 
 }
 
 void Assignment() #Assignment : {}
 {
-    <ID> <ASSIGMENT> Expression() < SEMICOLON>   
+
+  // se viene mancato il simbolo di assignment
+  try {
+    
+    <ID> <ASSIGNMENT> Expression() <SEMICOLON> 
+    
+	} catch (ParseException e) {
+	   System.err.println("missing assignment symbol at line: " + token.beginLine + " column: " + token.beginColumn);
+  		error_skip( SEMICOLON );
+	}
 }
 
 void Expression() #Expression : {}
 {
-	MulDivExpr() (< SUM_DIF > { jjtn000.value = token.image;} MulDivExpr())*
+	MulDivExpr() ExpressionExt() 
+}
+
+void ExpressionExt() #ExpressionExt : { }
+{
+  [sumDif() MulDivExpr() ExpressionExt()]
 }
 
 void Condition() #Condition : {}
 {
-    Expression() < COMPARISON > Expression()
+    try { Expression() < COMPARISON > Expression() } catch (ParseException e) { condition_error(); error_skip(THEN); }
 }
+
 
 void MulDivExpr() #MulDivExpr : {}
 {
-    Factor() (< MULT_DIV > { jjtn000.value = token.image;} Factor())* 
+    Factor() MulDivExprExt()
 }
 
-void Factor() #Factor : { }
+void MulDivExprExt() #MulDivExprExt : {}
 {
-     < ID > { jjtn000.value = token.image;} | [<SUM_DIF >] <NUMBER> { jjtn000.value = token.image;/*c*/} | <LEF_BRA> Expression() <RIGHT_BRA>
+  < MULT_DIV > Factor() MulDivExprExt() | { }
+}
 
+void Factor() #Factor : {boolean neg = false;}
+{
+	< ID > { jjtn000.value = token.image;} | <NUMBER> { jjtn000.value = token.image;}  | <LEF_BRA> Expression() <RIGHT_BRA> | <SUM_DIF><NUMBER> { jjtn000.value = "-" +  token.image; neg = false; } 
 }
 
 void IfThen() #IfThen : {}
 {
-    <IF> Condition() < THEN > Statements() [<ELSE> Statements()] <END>
+
+ <IF> Condition() try { <THEN> } catch (ParseException e) {
+   System.err.println("ERROR IGNORED: missing then statement at line: " + token.beginLine + " column: " + token.beginColumn );
+   System.err.println(e.toString());
+   } <NEWLINE> Statements() [<ELSE> Statements()]  <END> <NEWLINE>                       
+
 }
 
-void RepeatUntil() #RepeatUntil : {}
+void RepeatUntil() #RepeatUntil : {int S = token.beginLine + 1;}
 {
-    <REPEAT> Statements() <UNTIL> Condition()
+    <REPEAT> <NEWLINE> Statements() try { < UNTIL >  } catch (ParseException e) {
+    System.err.println("\nERROR missing until statement for repeat at line: " + S);
+    error_skip(NEWLINE);
+    return;
+	
+    } Condition()  < NEWLINE >
 }
 
+
+
+void sumDif() #sumDif: { }
+{
+  < SUM_DIF > { jjtn000.value = token.image;}
+}
 
 

@@ -1,3 +1,11 @@
+
+SYNTAX SUMMARY:
+- every control instruction (repeat, end, then) must be followed by a newline
+- every other instruction must be followed by a semicolon
+- comments are in {}
+- := is the assignment operator
+-------------------------------------------------------------------------------------
+
 NT=
 Program
 Statement
@@ -9,20 +17,22 @@ RepeatUntil
 <Statements>
 --
 
-<Program>::= <Statements> EOF
+<Program>::= NEWLINE+ <Statements> EOF
 <Statements>::= <Statement> SEMICOLON <Statements> | <Statement>
-<Statement>::= <CallRead> | <CallWrite> | <Assigment> | <IfThen> | <RepeatUntil>
+<Statement>::= <CallRead> | <CallWrite> | <Assigment> | <IfThen> | <RepeatUntil> [NEWLINE]
 <CallWrite>::= WRITE (ID|NUMBER)
 <CalRead>::= READ (ID)
-<Assignment>::= ID ASSIGMENT <Expression>
+<Assignment>::= ID ASSIGNMENT <Expression>
 
-<Expression>::= <MulDivExpr> <ExpressionSum> 
-<ExpressionExt>::= SUM_DIF <MulDivExpr> <ExpressionSum> | epsilon
+ previous  // <Expression> ::= <Expression> SUM_DIV <MulDivExpr> | <MulDivExpr>
+<Expression>::= <MulDivExpr> <ExpressionExt> 
+<ExpressionExt>::= SUM_DIF <MulDivExpr> <ExpressionExt> | epsilon
+
 
 <MulDivExpr>::= <Factor> <MulDivExprExt>
 <MulDivExprExt>::= MUL_DIV <Factor> <MulDivExprExt> | epsilon		
 
 <Factor>::= ID | NUMBER | (LEF_PAR <Expression> RIGHT_PAR)
-<IfThen>::= IF <Condition> THEN <Statements> [ELSE <Statements>] END
+<IfThen>::= IF <Condition> THEN NEWLINE <Statements> [ELSE <Statements>] END NEWLINE
 <Condition>::= <Expression> COMPARISON <Expression>
-<RepeatUntil>::= REPEAT <Statements> UNTIL <Condition>
+<RepeatUntil>::= REPEAT <Statements> UNTIL <Condition> NEWLINE
