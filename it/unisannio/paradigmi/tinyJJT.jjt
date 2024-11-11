@@ -283,11 +283,8 @@ void IfThen() #IfThen : {int S = token.beginLine + 1;}
  <IF> Condition() try { <THEN> } catch (ParseException e) {
    System.err.println("ERROR IGNORED: missing then statement at line: " + token.beginLine + " column: " + token.beginColumn );
    System.err.println(e.toString());
-   
-   
 	} try {  <NEWLINE> } catch (ParseException e) {control_flow_with_semicolon();} Statements() [<ELSE> Statements()]  try { <END> } catch (ParseException e) {
-    System.err.println("ERROR missing end statement for if-then at line: " + S);
-    
+    System.err.println("ERROR missing end statement for if-then at line: " + S); 
   } try {  <NEWLINE> } catch (ParseException e) {control_flow_with_semicolon(); }
                  
 
