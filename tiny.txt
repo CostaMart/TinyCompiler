@@ -10,5 +10,5 @@ end
 x := x + 1;
 repeat
 x:=1;
-until x>3
+until x>10
 x:=2;

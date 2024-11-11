@@ -108,7 +108,7 @@ public class Tiny/*@bgen(jjtree)*/implements TinyTreeConstants, TinyConstants {/
           }
   }
 
-  void control_flow_with_semicolon() throws ParseException {System.err.println("\nERROR: control statements must not be followed by semicolon line: " + token.beginLine); error_skip(NEWLINE);
+  void control_flow_with_semicolon() throws ParseException {System.err.println("\nERROR: control statements must not be followed by semicolon line: " + token.beginLine); error_skip(SKIP_TWO);
   }
 
   void condition_error() throws ParseException {System.err.println("bad formatted condition at row: " + token.beginLine );
@@ -141,12 +141,13 @@ public class Tiny/*@bgen(jjtree)*/implements TinyTreeConstants, TinyConstants {/
         }
         Statements();
         jj_consume_token(0);
-{if ("" != null) return jjtn000;}
       } catch (ParseException e) {
 general_error();
       error_skip(NEWLINE);
-      {if ("" != null) return jjtn000;}
       }
+jjtree.closeNodeScope(jjtn000, true);
+      jjtc000 = false;
+{if ("" != null) return jjtn000;}
     } catch (Throwable jjte000) {
 if (jjtc000) {
      jjtree.clearNodeScope(jjtn000);
@@ -583,9 +584,9 @@ if (jjtc000) {
 }
 
   final public void IfThen() throws ParseException {/*@bgen(jjtree) IfThen */
-  ASTIfThen jjtn000 = new ASTIfThen(JJTIFTHEN);
-  boolean jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);
+                         ASTIfThen jjtn000 = new ASTIfThen(JJTIFTHEN);
+                         boolean jjtc000 = true;
+                         jjtree.openNodeScope(jjtn000);int S = token.beginLine + 1;
     try {
       jj_consume_token(IF);
       Condition();
@@ -611,8 +612,16 @@ control_flow_with_semicolon();
         jj_la1[8] = jj_gen;
         ;
       }
-      jj_consume_token(END);
-      jj_consume_token(NEWLINE);
+      try {
+        jj_consume_token(END);
+      } catch (ParseException e) {
+System.err.println("ERROR missing end statement for if-then at line: " + S);
+      }
+      try {
+        jj_consume_token(NEWLINE);
+      } catch (ParseException e) {
+control_flow_with_semicolon();
+      }
     } catch (Throwable jjte000) {
 if (jjtc000) {
      jjtree.clearNodeScope(jjtn000);
@@ -650,7 +659,7 @@ control_flow_with_semicolon();
         jj_consume_token(UNTIL);
       } catch (ParseException e) {
 System.err.println("\nERROR missing until statement for repeat at line: " + S);
-    error_skip(NEWLINE);
+    System.err.println("EOF was still reached");
     {if ("" != null) return;}
       }
       Condition();

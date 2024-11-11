@@ -182,7 +182,7 @@ void general_error() {
 
 JAVACODE
 void control_flow_with_semicolon() {
-        System.err.println("\nERROR: control statements must not be followed by semicolon line: " + token.beginLine); error_skip(NEWLINE); 
+        System.err.println("\nERROR: control statements must not be followed by semicolon line: " + token.beginLine); error_skip(SKIP_TWO); 
     }
 
 
@@ -200,19 +200,20 @@ SimpleNode Program() #Program : {}
 {
  try { 
    (< NEWLINE >)* Statements() <EOF>
-    { return jjtThis; }
     } catch (ParseException e) {
       general_error();
       error_skip(NEWLINE);
-      return jjtThis;
-    }
+      
+}
+    { return jjtThis; }
  
 }
 
 
 void Statements() #Statements : {}
 {
-    Statement()  [Statements()]
+ 
+    Statement()  [Statements()] 
 }
 
 void Statement() #Statement : {}
@@ -276,13 +277,19 @@ void Factor() #Factor : {boolean neg = false;}
 	< ID > { jjtn000.value = token.image;} | <NUMBER> { jjtn000.value = token.image;}  | <LEF_BRA> Expression() <RIGHT_BRA> | <SUM_DIF><NUMBER> { jjtn000.value = "-" +  token.image; neg = false; } 
 }
 
-void IfThen() #IfThen : {}
+void IfThen() #IfThen : {int S = token.beginLine + 1;}
 {
 
  <IF> Condition() try { <THEN> } catch (ParseException e) {
    System.err.println("ERROR IGNORED: missing then statement at line: " + token.beginLine + " column: " + token.beginColumn );
    System.err.println(e.toString());
-	} try {  <NEWLINE> } catch (ParseException e) {control_flow_with_semicolon();} Statements() [<ELSE> Statements()]  <END> <NEWLINE>                       
+   
+   
+	} try {  <NEWLINE> } catch (ParseException e) {control_flow_with_semicolon();} Statements() [<ELSE> Statements()]  try { <END> } catch (ParseException e) {
+    System.err.println("ERROR missing end statement for if-then at line: " + S);
+    
+  } try {  <NEWLINE> } catch (ParseException e) {control_flow_with_semicolon(); }
+                 
 
 }
 
@@ -290,7 +297,7 @@ void RepeatUntil() #RepeatUntil : {int S = token.beginLine + 1;}
 {
     <REPEAT> try { <NEWLINE> } catch(ParseException e) { control_flow_with_semicolon();} Statements() try { < UNTIL >  } catch (ParseException e) {
     System.err.println("\nERROR missing until statement for repeat at line: " + S);
-    error_skip(NEWLINE);
+    System.err.println("EOF was still reached");
     return;
 	
     } Condition()  try {  <NEWLINE> } catch (ParseException e) {control_flow_with_semicolon();}
