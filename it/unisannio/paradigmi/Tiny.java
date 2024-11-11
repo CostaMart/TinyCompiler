@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 public class Tiny/*@bgen(jjtree)*/implements TinyTreeConstants, TinyConstants {/*@bgen(jjtree)*/
   protected JJTTinyState jjtree = new JJTTinyState();
   final private int SKIP_ONE = -1;
+  final private int SKIP_TWO = -2;
 
     public static void main(String[] args) throws ParseException, FileNotFoundException {
 
@@ -60,25 +61,35 @@ public class Tiny/*@bgen(jjtree)*/implements TinyTreeConstants, TinyConstants {/
         Token t = new Token();
         boolean first = true;
         int next = 0;
-
+        int       startC = 0;
+        int  startL = 0;
                         while (true){
                                 next++;
                                 // make the token advance without moving the pointer
                                 t = getToken(next);
                     Token advancing = new Token();
-
+                    if(first) {
+                                startC = t.beginColumn;
+                                startL = t.beginLine;
+                                first = false;
+                        }
                                 // once a synchronization point is found make the pointer advance
-                                if(kind == SKIP_ONE || t.kind == kind || t.kind == NEWLINE || t.kind == EOF) {
+                                if(kind == SKIP_TWO || kind == SKIP_ONE || t.kind == kind || t.kind == NEWLINE || t.kind == EOF) {
+                                        if (kind == SKIP_TWO) {
+                                          next ++;
+                                          next ++;
+
+                                          }
+
+
                         for (int i = 0; i < next-1; i++) {
                           advancing = getNextToken();
                           }
 
-                        int       startC = t.beginColumn;
-                                        int  startL = t.beginLine;
 
-                                        System.err.println(e.toString());
+                                        if(kind != SKIP_TWO) System.err.println(e.toString());
                                         System.err.println("ERROR RECOVERED with panic mode");
-                                        System.err.println("ignoring from: Column - "  + startC + " Row - " + startL  + "\nto: Column - " +  t.beginColumn + " Row - " + t.beginLine );
+                                        System.err.println("ignoring from: Column - "  + startC + " Row - " + startL  + "\nto: Column - " +  t.beginColumn + " Row - " + t.beginLine + "\n");
                                         return;
                                 }
                 }
@@ -95,6 +106,9 @@ public class Tiny/*@bgen(jjtree)*/implements TinyTreeConstants, TinyConstants {/
                         } else {
             System.err.println("ERROR: general error at line: " + token.beginLine);
           }
+  }
+
+  void control_flow_with_semicolon() throws ParseException {System.err.println("\nERROR: control statements must not be followed by semicolon line: " + token.beginLine); error_skip(NEWLINE);
   }
 
   void condition_error() throws ParseException {System.err.println("bad formatted condition at row: " + token.beginLine );
@@ -114,7 +128,6 @@ public class Tiny/*@bgen(jjtree)*/implements TinyTreeConstants, TinyConstants {/
       try {
         label_1:
         while (true) {
-          jj_consume_token(NEWLINE);
           switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
           case NEWLINE:{
             ;
@@ -124,6 +137,7 @@ public class Tiny/*@bgen(jjtree)*/implements TinyTreeConstants, TinyConstants {/
             jj_la1[0] = jj_gen;
             break label_1;
           }
+          jj_consume_token(NEWLINE);
         }
         Statements();
         jj_consume_token(0);
@@ -226,14 +240,18 @@ if (jjtc000) {
         jj_consume_token(-1);
         throw new ParseException();
       }
-      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case NEWLINE:{
-        jj_consume_token(NEWLINE);
-        break;
+      label_2:
+      while (true) {
+        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+        case NEWLINE:{
+          ;
+          break;
+          }
+        default:
+          jj_la1[3] = jj_gen;
+          break label_2;
         }
-      default:
-        jj_la1[3] = jj_gen;
-        ;
+        jj_consume_token(NEWLINE);
       }
     } catch (Throwable jjte000) {
 if (jjtc000) {
@@ -308,10 +326,15 @@ if (jjtc000) {
         jj_consume_token(ID);
         jj_consume_token(ASSIGNMENT);
         Expression();
-        jj_consume_token(SEMICOLON);
+        try {
+          jj_consume_token(SEMICOLON);
+        } catch (ParseException e) {
+System.err.println("ERROR: missing semicolon at line: " + token.beginLine);
+      error_skip(NEWLINE);
+        }
       } catch (ParseException e) {
-System.err.println("missing assignment symbol at line: " + token.beginLine + " column: " + token.beginColumn);
-                        error_skip( NEWLINE );
+System.err.println("ERROR: missing assignment symbol at line: " + token.beginLine + " column: " + token.beginColumn);
+                        error_skip(NEWLINE);
       }
     } catch (Throwable jjte000) {
 if (jjtc000) {
@@ -572,7 +595,11 @@ if (jjtc000) {
 System.err.println("ERROR IGNORED: missing then statement at line: " + token.beginLine + " column: " + token.beginColumn );
    System.err.println(e.toString());
       }
-      jj_consume_token(NEWLINE);
+      try {
+        jj_consume_token(NEWLINE);
+      } catch (ParseException e) {
+control_flow_with_semicolon();
+      }
       Statements();
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case ELSE:{
@@ -613,7 +640,11 @@ if (jjtc000) {
                                    jjtree.openNodeScope(jjtn000);int S = token.beginLine + 1;
     try {
       jj_consume_token(REPEAT);
-      jj_consume_token(NEWLINE);
+      try {
+        jj_consume_token(NEWLINE);
+      } catch (ParseException e) {
+control_flow_with_semicolon();
+      }
       Statements();
       try {
         jj_consume_token(UNTIL);
@@ -623,7 +654,11 @@ System.err.println("\nERROR missing until statement for repeat at line: " + S);
     {if ("" != null) return;}
       }
       Condition();
-      jj_consume_token(NEWLINE);
+      try {
+        jj_consume_token(NEWLINE);
+      } catch (ParseException e) {
+control_flow_with_semicolon();
+      }
     } catch (Throwable jjte000) {
 if (jjtc000) {
         jjtree.clearNodeScope(jjtn000);
