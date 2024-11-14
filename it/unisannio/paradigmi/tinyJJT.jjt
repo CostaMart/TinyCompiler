@@ -17,6 +17,7 @@ import java.io.FileNotFoundException;
 public class Tiny {
   
   final private int SKIP_ONE = -1;
+  final private int SKIP_TWO = -2;
 
     public static void main(String[] args) throws ParseException, FileNotFoundException {
 
@@ -31,7 +32,6 @@ public class Tiny {
 
         Tiny t = new Tiny(s);
         SimpleNode n = t.Program();
-		System.out.println("Normally we read AST from left to right. In this representation we go from up to bottom \n\n");
         printTree(n,"",true);
         
     }
@@ -120,37 +120,70 @@ SKIP : {
 //  error management methods --------------------------
 
 JAVACODE // this function recovers form error in panic mode fashion, by skipping tokens until a synchronization point is found
+		// with SKIP_ONE it skips only one token
 void error_skip(int kind) {
 	ParseException e = generateParseException();
 	Token t = new Token();
 	boolean first = true;
 	int next = 0;
-	
+	int	  startC = 0;
+	int  startL = 0;
 			while (true){
 				next++;
 				// make the token advance without moving the pointer
 				t = getToken(next);
 	            Token advancing = new Token();
-
+	            if(first) { 
+				startC = t.beginColumn;
+				startL = t.beginLine;
+				first = false;
+		        }
 				// once a synchronization point is found make the pointer advance
-				if(kind == SKIP_ONE || t.kind == kind || t.kind == NEWLINE || t.kind == EOF) {
+				if(kind == SKIP_TWO || kind == SKIP_ONE || t.kind == kind || t.kind == NEWLINE || t.kind == EOF) {
+					if (kind == SKIP_TWO) {
+					  next ++;
+					  next ++;
+					  
+					  }
+
 
 	                for (int i = 0; i < next-1; i++) {
 	                  advancing = getNextToken();
 	                  }
 	                  
-	                int	  startC = t.beginColumn;
-					int  startL = t.beginLine;
-					
-					System.err.println(e.toString());
+
+					if(kind != SKIP_TWO) System.err.println(e.toString());
 					System.err.println("ERROR RECOVERED with panic mode");
-					System.err.println("ignoring from: Column - "  + startC + " Row - " + startL  + "\nto: Column - " +  t.beginColumn + " Row - " + t.beginLine );
+					System.err.println("ignoring from: Column - "  + startC + " Row - " + startL  + "\nto: Column - " +  t.beginColumn + " Row - " + t.beginLine + "\n");
 					return;
-			  }
+				}
 		}
 }
 
 
+				
+	           
+
+JAVACODE
+void general_error() {
+        ParseException e = generateParseException();
+
+        if(e.toString().contains("until")) {
+          System.err.println("ERROR: until statement out of repeat context at line " + (token.beginLine + 1));
+
+          } else if (e.toString().contains("end")) {
+			System.err.println("ERROR: end statement out of if-then context at line " + (token.beginLine + 1));
+
+			} else {
+            System.err.println("ERROR: general error at line: " + token.beginLine);
+          }
+          
+    }
+
+JAVACODE
+void control_flow_with_semicolon() {
+        System.err.println("\nERROR: control statements must not be followed by semicolon line: " + token.beginLine); error_skip(SKIP_TWO); 
+    }
 
 
 JAVACODE
@@ -165,8 +198,13 @@ void condition_error() {
 // Definizione delle regole sintattiche con nodi per l'AST
 SimpleNode Program() #Program : {}
 {
- 
-   (< NEWLINE >)+ Statements() <EOF>
+ try { 
+   (< NEWLINE >)* Statements() <EOF>
+    } catch (ParseException e) {
+      general_error();
+      error_skip(NEWLINE);
+      
+}
     { return jjtThis; }
  
 }
@@ -174,13 +212,14 @@ SimpleNode Program() #Program : {}
 
 void Statements() #Statements : {}
 {
-    Statement()  [Statements()]
+ 
+    Statement()  [Statements()] 
 }
 
 void Statement() #Statement : {}
 {
 
-   (CallRead() | CallWrite() | Assignment() | RepeatUntil() | IfThen()) [<NEWLINE>]
+   (CallRead() | CallWrite() | Assignment() | RepeatUntil() | IfThen()) (<NEWLINE>)*
 
 }
 
@@ -196,16 +235,15 @@ void CallWrite() #CallWrite : {}
 
 void Assignment() #Assignment : {}
 {
-
-  // se viene mancato il simbolo di assignment
   try {
-    
-    <ID> <ASSIGNMENT> Expression() <SEMICOLON> 
-    
-	} catch (ParseException e) {
-	   System.err.println("missing assignment symbol at line: " + token.beginLine + " column: " + token.beginColumn);
-  		error_skip( SEMICOLON );
-	}
+    <ID> <ASSIGNMENT> Expression() try { <SEMICOLON> } catch (ParseException e) {
+      System.err.println("ERROR: missing semicolon at line: " + token.beginLine);
+      error_skip(NEWLINE);
+    }
+	   } catch (ParseException e) {
+		   System.err.println("ERROR: missing assignment symbol at line: " + token.beginLine + " column: " + token.beginColumn);
+	  		error_skip(NEWLINE);
+	  	}
 }
 
 void Expression() #Expression : {}
@@ -239,24 +277,27 @@ void Factor() #Factor : {boolean neg = false;}
 	< ID > { jjtn000.value = token.image;} | <NUMBER> { jjtn000.value = token.image;}  | <LEF_BRA> Expression() <RIGHT_BRA> | <SUM_DIF><NUMBER> { jjtn000.value = "-" +  token.image; neg = false; } 
 }
 
-void IfThen() #IfThen : {}
+void IfThen() #IfThen : {int S = token.beginLine + 1;}
 {
 
  <IF> Condition() try { <THEN> } catch (ParseException e) {
    System.err.println("ERROR IGNORED: missing then statement at line: " + token.beginLine + " column: " + token.beginColumn );
    System.err.println(e.toString());
-   } <NEWLINE> Statements() [<ELSE> Statements()]  <END> <NEWLINE>                       
+	} try {  <NEWLINE> } catch (ParseException e) {control_flow_with_semicolon();} Statements() [<ELSE> Statements()]  try { <END> } catch (ParseException e) {
+    System.err.println("ERROR missing end statement for if-then at line: " + S); 
+  } try {  <NEWLINE> } catch (ParseException e) {control_flow_with_semicolon(); }
+                 
 
 }
 
 void RepeatUntil() #RepeatUntil : {int S = token.beginLine + 1;}
 {
-    <REPEAT> <NEWLINE> Statements() try { < UNTIL >  } catch (ParseException e) {
+    <REPEAT> try { <NEWLINE> } catch(ParseException e) { control_flow_with_semicolon();} Statements() try { < UNTIL >  } catch (ParseException e) {
     System.err.println("\nERROR missing until statement for repeat at line: " + S);
-    error_skip(NEWLINE);
+    System.err.println("EOF was still reached");
     return;
 	
-    } Condition()  < NEWLINE >
+    } Condition()  try {  <NEWLINE> } catch (ParseException e) {control_flow_with_semicolon();}
 }
 
 
