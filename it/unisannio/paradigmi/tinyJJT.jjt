@@ -225,12 +225,13 @@ void Statement() #Statement : {}
 
 void CallRead() #CallRead : {}
 {
-    <READFNC> <ID> <SEMICOLON>
+    <READFNC> try { <ID> <SEMICOLON>} catch(ParseException e) { System.err.println("ERROR: missing parameter after read call at line: " + token.beginLine + " column: " + token.beginColumn); error_skip(NEWLINE);}
+
 }
 
 void CallWrite() #CallWrite : {}
 {
-    <WRITEFNC> (<ID>|<NUMBER>) <SEMICOLON> 
+    <WRITEFNC> try { (<ID>|<NUMBER>) <SEMICOLON> } catch(ParseException e) { System.err.println("ERROR: missing parameter after write call at line: " + token.beginLine + " column: " + token.beginColumn); error_skip(NEWLINE);}
 }
 
 void Assignment() #Assignment : {}

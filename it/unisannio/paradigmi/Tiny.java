@@ -281,8 +281,12 @@ if (jjtc000) {
   jjtree.openNodeScope(jjtn000);
     try {
       jj_consume_token(READFNC);
-      jj_consume_token(ID);
-      jj_consume_token(SEMICOLON);
+      try {
+        jj_consume_token(ID);
+        jj_consume_token(SEMICOLON);
+      } catch (ParseException e) {
+System.err.println("ERROR: missing parameter after read call at line: " + token.beginLine + " column: " + token.beginColumn); error_skip(NEWLINE);
+      }
     } finally {
 if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
@@ -296,21 +300,25 @@ if (jjtc000) {
   jjtree.openNodeScope(jjtn000);
     try {
       jj_consume_token(WRITEFNC);
-      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case ID:{
-        jj_consume_token(ID);
-        break;
+      try {
+        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+        case ID:{
+          jj_consume_token(ID);
+          break;
+          }
+        case NUMBER:{
+          jj_consume_token(NUMBER);
+          break;
+          }
+        default:
+          jj_la1[4] = jj_gen;
+          jj_consume_token(-1);
+          throw new ParseException();
         }
-      case NUMBER:{
-        jj_consume_token(NUMBER);
-        break;
-        }
-      default:
-        jj_la1[4] = jj_gen;
-        jj_consume_token(-1);
-        throw new ParseException();
+        jj_consume_token(SEMICOLON);
+      } catch (ParseException e) {
+System.err.println("ERROR: missing parameter after write call at line: " + token.beginLine + " column: " + token.beginColumn); error_skip(NEWLINE);
       }
-      jj_consume_token(SEMICOLON);
     } finally {
 if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
