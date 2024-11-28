@@ -51,10 +51,10 @@ public class MyNumber {
 			if (operator.equals("+")) {
 				
 				return new MyNumber("float",
-						Integer.toString(Integer.parseInt(this.value) + Integer.parseInt(operator2.value)));
+						Double.toString(Double.parseDouble(this.value)  + Double.parseDouble(operator2.value)));
 			} else {
 				return new MyNumber("float",
-						Integer.toString(Integer.parseInt(this.value) - Integer.parseInt(operator2.value)));
+						Double.toString(Double.parseDouble(this.value) - Double.parseDouble(operator2.value)));
 			}
 		}
 	}
