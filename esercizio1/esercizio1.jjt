@@ -1,0 +1,205 @@
+options {
+    STATIC = false;
+    MULTI = true;
+    NODE_DEFAULT_VOID = true;
+    BUILD_PARSER = true;
+    BUILD_NODE_FILES = true;
+}
+
+PARSER_BEGIN(Tiny)
+
+package esercizio1;
+import it.unisannio.symbolTable.*;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.FileNotFoundException;
+
+public class Tiny {
+  
+  final private int SKIP_ONE = -1;
+  final private int SKIP_TWO = -2;
+  final static SymbolTable symbolTable = SymbolTableFactory.getInstance();
+  
+    public static void main(String[] args) throws ParseException, FileNotFoundException {
+
+      
+
+        InputStream s;
+        if (args.length > 0) {
+            s = new FileInputStream(args[0]);
+        } else {
+            s = System.in;
+        }
+
+        Tiny t = new Tiny(s);
+        SimpleNode n = t.Program();
+        printTree(n,"",true);
+        
+    }
+
+
+      public static void printTree(SimpleNode node, String prefix, boolean isTail) { 
+		String GREEN = "\u001B[32m";       
+		String RESET = "\u001B[0m";
+		
+		if (node == null) {
+            return;
+        }
+
+        // Stampa il nodo corrente
+        System.out.print(prefix);
+        System.out.print(isTail ? "└── " : "├── ");
+        if(node.value != null)
+        System.out.println(node.toString()+ ": "+ GREEN + node.value +RESET); 
+		else
+		System.out.println(node.toString());
+		
+        // Costruisci il nuovo prefisso per i figli
+        prefix += isTail ? "    " : "│   ";
+
+        // Visita i figli del nodo
+        for (int i = 0; i < node.jjtGetNumChildren(); i++) {
+            SimpleNode child = (SimpleNode) node.jjtGetChild(i);
+            printTree(child, prefix, i == node.jjtGetNumChildren() - 1);
+        }
+    }
+
+    
+			    
+}
+
+PARSER_END(Tiny)
+
+// Dichiarazioni del gestore di token
+TOKEN_MGR_DECLS : {
+  	
+    int KEYS = 0;
+    int CONTROLS = 0;
+    int COMMENTS = 0;
+    SymbolTable symbolTable = SymbolTableFactory.getInstance();
+   
+}
+
+// Definizione dei token
+TOKEN : {
+  < TYPE: "int" | "float" >
+  | < PRINTFNC: "print">                         { KEYS++; }
+  | <SEMICOLON: ";">                            { KEYS++; }
+  | <REPEAT: "repeat">                          { KEYS++; CONTROLS++; }
+  | < COMMA: "," >
+}
+
+TOKEN : {
+  <NUMBER: (<NUMBA>)+>                          { KEYS++; }
+  | <ID: <LETTER>(<LETTER> | <NUMBA> | "_" )*>  { KEYS++; symbolTable.put(matchedToken.image, matchedToken.kind,0,0,0,0); }
+}
+
+TOKEN : {
+   <ASSIGNMENT: "=">                            { KEYS++; }
+  | <LEF_BRA: "(">
+  | <RIGHT_BRA: ")">
+  | <MULT_DIV: ("/"|"*")>                       { KEYS++; }
+  | <SUM_DIF: ("-"|"+")>                        { KEYS++; }
+  | <COMPARISON: ("<"|">")>                 { KEYS++; }
+
+}
+
+TOKEN : {
+  <#NUMBA: (["0"-"9"])>
+  | <#LETTER: (["A"-"Z","a"-"z"])>
+}
+
+SKIP : {
+    < SKIPPED : [" ", "\t", "\r","\n"]>
+   | <COMMENT: "{" (~["}"])* "}" > { COMMENTS++; }
+}
+
+
+
+// -----------------------------	
+
+
+
+
+// Definizione delle regole sintattiche con nodi per l'AST
+SimpleNode Program() #Program : {}
+{
+   Statements() <EOF>
+   { return jjtThis; }
+ }
+
+
+void Statements() #Statements : {}
+{
+ 
+    Statement()  [Statements()] 
+}
+
+void Statement() #Statement : {}
+{
+   ( CallWrite() | Assignment() | declaration()) 
+}
+
+void CallWrite() #CallPrint : { String toPrint = "";}
+{
+    <PRINTFNC> <LEF_BRA> (<ID>|<NUMBER>) { toPrint = symbolTable.getRecord(token.image,0,0).getValue().toString();} <RIGHT_BRA> <SEMICOLON>
+    { System.out.println(toPrint);}
+}
+
+void declaration() #declaration : {String type;}
+	{
+	  < TYPE > { jjtn000.value = token.image; type = token.image;} <ID > multiDeclaration(type) < SEMICOLON>
+}
+
+
+void multiDeclaration(String type) #multiDeclaration:  {}
+{
+  <COMMA> <ID> {symbolTable.put(token.image, token.kind, 0,0,0,0); symbolTable.updateRecordType(token.image,0,0,type); jjtn000.value = token.image;} multiDeclaration(type) | { }
+}
+
+void Assignment() #Assignment : {Token t; Integer val;}
+  {
+    (<ID> {t = token;  } <ASSIGNMENT> val = Expression() <SEMICOLON>)
+    {symbolTable.updateRecordVal(t.image, 0,0, val); }
+}
+
+Integer Expression() #Expression : {Integer val; Integer sumResult = null;}
+{
+	val = MulDivExpr() sumResult = ExpressionExt(val)
+	{if (sumResult != null) return sumResult;
+	  return val;}
+}
+
+Integer ExpressionExt(Integer operand) #ExpressionExt : {String operator = null; Integer operand2 = null; Integer val = null; Integer result= null;  }
+{
+  [sumDif() {operator = token.image;} operand2 = MulDivExpr() { if(operator.equals("+") ) { val = operand+operand2;} else if (operator.equals("-") ) {val = operand-operand2; }} result = ExpressionExt(val) {if(result != null) return result; return val; }]
+  {return val; }
+}
+
+
+Integer MulDivExpr() #MulDivExpr : {Integer val; Integer val2;}
+{
+    val = Factor() val2 = MulDivExprExt(val)
+    {if(val2 != null) return val2; 
+    return val;}
+      
+}
+
+Integer MulDivExprExt(Integer operand) #MulDivExprExt : {boolean factorFound = false; String operator = null; Integer val = null; Integer fact = null; Integer mulDiv = null;}
+{
+  (< MULT_DIV > {operator = token.image; } fact = Factor() { if(operator.equals("*") ) { val = operand*fact; } else if (operator.equals("/") ) {val = operand/fact; }} mulDiv = MulDivExprExt(val) | {})
+  {if(mulDiv != null) return mulDiv; return val;}
+}
+
+Integer Factor() #Factor : {Integer val =0; Integer result = null;}
+{
+	(< ID > {val = (Integer) symbolTable.getRecord(token.image, 0,0).getValue();} | <NUMBER> { val = Integer.parseInt(token.image); }  | (<LEF_BRA> result = Expression() { if (result != null) val = result;} <RIGHT_BRA>) | <SUM_DIF><NUMBER> { val = Integer.parseInt(token.image);})
+	{return val;}
+}
+
+void sumDif() #sumDif: { }
+{
+  < SUM_DIF > { jjtn000.value = token.image;}
+}
+
+

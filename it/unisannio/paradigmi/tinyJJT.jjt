@@ -103,7 +103,7 @@ TOKEN : {
   | <MULT_DIV: ("/"|"*")>                       { KEYS++; }
   | <SUM_DIF: ("-"|"+")>                        { KEYS++; }
   | <COMPARISON: ("<"|"="|">")>                 { KEYS++; }
-  | < NEWLINE: "\n" >                           { KEYS++; }
+  | < NEWLINE: "\n" >                          { KEYS++; }
 }
 
 TOKEN : {
