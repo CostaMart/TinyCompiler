@@ -45,12 +45,48 @@ public class SymbolTable {
             System.out.println("--------------------------------------------------------------");
         }
     }
+    
+    public void updateRecordVal(String lex, int beginLine, int beginColumn, Object value) {
+    	List<Record> l = table.get(lex);
+        if (l == null)
+            return;
+        for (int i = 0; i < l.size(); i++) {
+            Record r = l.get(i);
+            if (r.beginColumn == beginColumn && r.beginLine == beginLine) {
+
+                r.setValue(value);
+
+                l.set(i, r);
+                return;            
+                }
+        }
+    }
+    
+    public void updateRecordType(String lex, int beginLine, int beginColumn, String type) {
+    	List<Record> l = table.get(lex);
+        if (l == null)
+            return;
+        for (int i = 0; i < l.size(); i++) {
+            Record r = l.get(i);
+            if (r.beginColumn == beginColumn && r.beginLine == beginLine) {
+
+                r.setType(type);
+
+                l.set(i, r);
+                return;            
+                }
+        }
+    }
+    
+
 
 
 
 
     public class Record {
-        int token; // token
+    	Object value;
+    	String type;
+		int token; // token
         int beginLine; // punto di inizio del lessema nel codice (rispetto alla linea)
         int endLine; // punto di fine lessema nel codice (rispetto alla linea)
         int beginColumn; // punto di inizio lessema nel codice (rispetto alla colonna)
@@ -85,6 +121,23 @@ public class SymbolTable {
             return beginColumn;
         }
 
+        public Object getValue() {
+			return value;
+		}
+
+
+		public void setValue(Object value) {
+			this.value = value;
+		}
+		
+		public String getType() {
+			return type;
+		}
+		
+		public void setType(String type) {
+			this.type = type;
+		}
+        
     }
 
 }
