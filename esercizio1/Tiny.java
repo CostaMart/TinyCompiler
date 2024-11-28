@@ -113,22 +113,22 @@ if (jjtc000) {
       }
     } catch (Throwable jjte000) {
 if (jjtc000) {
-        jjtree.clearNodeScope(jjtn000);
-        jjtc000 = false;
-      } else {
-        jjtree.popNode();
-      }
-      if (jjte000 instanceof RuntimeException) {
-        {if (true) throw (RuntimeException)jjte000;}
-      }
-      if (jjte000 instanceof ParseException) {
-        {if (true) throw (ParseException)jjte000;}
-      }
-      {if (true) throw (Error)jjte000;}
+      jjtree.clearNodeScope(jjtn000);
+      jjtc000 = false;
+    } else {
+      jjtree.popNode();
+    }
+    if (jjte000 instanceof RuntimeException) {
+      {if (true) throw (RuntimeException)jjte000;}
+    }
+    if (jjte000 instanceof ParseException) {
+      {if (true) throw (ParseException)jjte000;}
+    }
+    {if (true) throw (Error)jjte000;}
     } finally {
 if (jjtc000) {
-        jjtree.closeNodeScope(jjtn000, true);
-      }
+      jjtree.closeNodeScope(jjtn000, true);
+    }
     }
 }
 
@@ -218,6 +218,7 @@ if (jjtc000) {
       jj_consume_token(TYPE);
 jjtn000.value = token.image; type = token.image;
       jj_consume_token(ID);
+symbolTable.put(token.image, token.kind, 0,0,0,0); symbolTable.updateRecordType(token.image,0,0,type); jjtn000.value = token.image;
       multiDeclaration(type);
       jj_consume_token(SEMICOLON);
     } catch (Throwable jjte000) {
@@ -284,16 +285,19 @@ if (jjtc000) {
   final public void Assignment() throws ParseException {/*@bgen(jjtree) Assignment */
                                  ASTAssignment jjtn000 = new ASTAssignment(JJTASSIGNMENT);
                                  boolean jjtc000 = true;
-                                 jjtree.openNodeScope(jjtn000);Token t; Integer val;
+                                 jjtree.openNodeScope(jjtn000);Token t; MyNumber val; String varType; String valueType;
     try {
       jj_consume_token(ID);
-t = token;
+t = token;  jjtn000.value = token.image; varType = symbolTable.getRecord(token.image,0,0).getType();
       jj_consume_token(ASSIGNMENT);
       val = Expression();
       jj_consume_token(SEMICOLON);
 jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
-symbolTable.updateRecordVal(t.image, 0,0, val);
+if(!varType.equals(val.getType().toString())) {
+        {if (true) throw new ParseException("Trying to assign " + val.getType() + " to " +  varType );} }
+
+      symbolTable.updateRecordVal(t.image, 0,0, val.getValue());
     } catch (Throwable jjte000) {
 if (jjtc000) {
         jjtree.clearNodeScope(jjtn000);
@@ -315,10 +319,10 @@ if (jjtc000) {
     }
 }
 
-  final public Integer Expression() throws ParseException {/*@bgen(jjtree) Expression */
-                                    ASTExpression jjtn000 = new ASTExpression(JJTEXPRESSION);
-                                    boolean jjtc000 = true;
-                                    jjtree.openNodeScope(jjtn000);Integer val; Integer sumResult = null;
+  final public MyNumber Expression() throws ParseException {/*@bgen(jjtree) Expression */
+                                     ASTExpression jjtn000 = new ASTExpression(JJTEXPRESSION);
+                                     boolean jjtc000 = true;
+                                     jjtree.openNodeScope(jjtn000);MyNumber val; MyNumber sumResult = null;
     try {
       val = MulDivExpr();
       sumResult = ExpressionExt(val);
@@ -348,17 +352,17 @@ if (jjtc000) {
     throw new Error("Missing return statement in function");
 }
 
-  final public Integer ExpressionExt(Integer operand) throws ParseException {/*@bgen(jjtree) ExpressionExt */
-                                                         ASTExpressionExt jjtn000 = new ASTExpressionExt(JJTEXPRESSIONEXT);
-                                                         boolean jjtc000 = true;
-                                                         jjtree.openNodeScope(jjtn000);String operator = null; Integer operand2 = null; Integer val = null; Integer result= null;
+  final public MyNumber ExpressionExt(MyNumber operand) throws ParseException {/*@bgen(jjtree) ExpressionExt */
+                                                           ASTExpressionExt jjtn000 = new ASTExpressionExt(JJTEXPRESSIONEXT);
+                                                           boolean jjtc000 = true;
+                                                           jjtree.openNodeScope(jjtn000);String operator = null; MyNumber operand2 = null; MyNumber val = null; MyNumber result= null;
     try {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case SUM_DIF:{
         sumDif();
 operator = token.image;
         operand2 = MulDivExpr();
-if(operator.equals("+") ) { val = operand+operand2;} else if (operator.equals("-") ) {val = operand-operand2; }
+val= operand.sumSubNumber(operator, operand2);
         result = ExpressionExt(val);
 if(result != null) {if ("" != null) return result;} {if ("" != null) return val;}
         break;
@@ -392,10 +396,10 @@ if (jjtc000) {
     throw new Error("Missing return statement in function");
 }
 
-  final public Integer MulDivExpr() throws ParseException {/*@bgen(jjtree) MulDivExpr */
-                                    ASTMulDivExpr jjtn000 = new ASTMulDivExpr(JJTMULDIVEXPR);
-                                    boolean jjtc000 = true;
-                                    jjtree.openNodeScope(jjtn000);Integer val; Integer val2;
+  final public MyNumber MulDivExpr() throws ParseException {/*@bgen(jjtree) MulDivExpr */
+                                     ASTMulDivExpr jjtn000 = new ASTMulDivExpr(JJTMULDIVEXPR);
+                                     boolean jjtc000 = true;
+                                     jjtree.openNodeScope(jjtn000);MyNumber val; MyNumber val2;
     try {
       val = Factor();
       val2 = MulDivExprExt(val);
@@ -425,17 +429,17 @@ if (jjtc000) {
     throw new Error("Missing return statement in function");
 }
 
-  final public Integer MulDivExprExt(Integer operand) throws ParseException {/*@bgen(jjtree) MulDivExprExt */
-                                                         ASTMulDivExprExt jjtn000 = new ASTMulDivExprExt(JJTMULDIVEXPREXT);
-                                                         boolean jjtc000 = true;
-                                                         jjtree.openNodeScope(jjtn000);boolean factorFound = false; String operator = null; Integer val = null; Integer fact = null; Integer mulDiv = null;
+  final public MyNumber MulDivExprExt(MyNumber operand) throws ParseException {/*@bgen(jjtree) MulDivExprExt */
+                                                           ASTMulDivExprExt jjtn000 = new ASTMulDivExprExt(JJTMULDIVEXPREXT);
+                                                           boolean jjtc000 = true;
+                                                           jjtree.openNodeScope(jjtn000);boolean factorFound = false; String operator = null; MyNumber val = null; MyNumber fact = null; MyNumber mulDiv = null;
     try {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case MULT_DIV:{
         jj_consume_token(MULT_DIV);
 operator = token.image;
         fact = Factor();
-if(operator.equals("*") ) { val = operand*fact; } else if (operator.equals("/") ) {val = operand/fact; }
+val = operand.multNumberDiv(operator, fact);
         mulDiv = MulDivExprExt(val);
         break;
         }
@@ -468,20 +472,19 @@ if (jjtc000) {
     throw new Error("Missing return statement in function");
 }
 
-  final public Integer Factor() throws ParseException {/*@bgen(jjtree) Factor */
-                            ASTFactor jjtn000 = new ASTFactor(JJTFACTOR);
-                            boolean jjtc000 = true;
-                            jjtree.openNodeScope(jjtn000);Integer val =0; Integer result = null;
+  final public MyNumber Factor() throws ParseException {/*@bgen(jjtree) Factor */
+                             ASTFactor jjtn000 = new ASTFactor(JJTFACTOR);
+                             boolean jjtc000 = true;
+                             jjtree.openNodeScope(jjtn000);MyNumber val =null; MyNumber result = null;
     try {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case ID:{
         jj_consume_token(ID);
-val = (Integer) symbolTable.getRecord(token.image, 0,0).getValue();
+val = new MyNumber(symbolTable.getRecord(token.image, 0,0).getType(),symbolTable.getRecord(token.image, 0,0).getValue().toString());
         break;
         }
       case NUMBER:{
-        jj_consume_token(NUMBER);
-val = Integer.parseInt(token.image);
+        val = MyNumber();
         break;
         }
       case LEF_BRA:{
@@ -493,8 +496,7 @@ if (result != null) val = result;
         }
       case SUM_DIF:{
         jj_consume_token(SUM_DIF);
-        jj_consume_token(NUMBER);
-val = Integer.parseInt(token.image);
+        val = MyNumber();
         break;
         }
       default:
@@ -503,7 +505,7 @@ val = Integer.parseInt(token.image);
         throw new ParseException();
       }
 jjtree.closeNodeScope(jjtn000, true);
-          jjtc000 = false;
+  jjtc000 = false;
 {if ("" != null) return val;}
     } catch (Throwable jjte000) {
 if (jjtc000) {
@@ -541,6 +543,13 @@ if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
     }
     }
+}
+
+  final public MyNumber MyNumber() throws ParseException {String type; String image;
+    jj_consume_token(NUMBER);
+image = token.image; try { Integer.parseInt(token.image); type = "int";} catch (NumberFormatException e) { type = "float";}
+{if ("" != null) return new MyNumber(type, token.image);}
+    throw new Error("Missing return statement in function");
 }
 
   /** Generated Token Manager. */

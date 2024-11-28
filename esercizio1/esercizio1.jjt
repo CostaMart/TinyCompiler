@@ -105,7 +105,7 @@ TOKEN : {
 }
 
 TOKEN : {
-  <#NUMBA: (["0"-"9"])>
+  	<#NUMBA: (["0"-"9"])+ (("." | ",") (["0"-"9"])+ )?>
   | <#LETTER: (["A"-"Z","a"-"z"])>
 }
 
@@ -131,8 +131,7 @@ SimpleNode Program() #Program : {}
 
 void Statements() #Statements : {}
 {
- 
-    Statement()  [Statements()] 
+  Statement()  [Statements()] 
 }
 
 void Statement() #Statement : {}
@@ -148,7 +147,7 @@ void CallWrite() #CallPrint : { String toPrint = "";}
 
 void declaration() #declaration : {String type;}
 	{
-	  < TYPE > { jjtn000.value = token.image; type = token.image;} <ID > multiDeclaration(type) < SEMICOLON>
+	  < TYPE > { jjtn000.value = token.image; type = token.image;} <ID > {symbolTable.put(token.image, token.kind, 0,0,0,0); symbolTable.updateRecordType(token.image,0,0,type); jjtn000.value = token.image;} multiDeclaration(type) < SEMICOLON>
 }
 
 
@@ -157,49 +156,59 @@ void multiDeclaration(String type) #multiDeclaration:  {}
   <COMMA> <ID> {symbolTable.put(token.image, token.kind, 0,0,0,0); symbolTable.updateRecordType(token.image,0,0,type); jjtn000.value = token.image;} multiDeclaration(type) | { }
 }
 
-void Assignment() #Assignment : {Token t; Integer val;}
+void Assignment() #Assignment : {Token t; MyNumber val; String varType; String valueType;}
   {
-    (<ID> {t = token;  } <ASSIGNMENT> val = Expression() <SEMICOLON>)
-    {symbolTable.updateRecordVal(t.image, 0,0, val); }
+    (<ID> {t = token;  jjtn000.value = token.image; varType = symbolTable.getRecord(token.image,0,0).getType(); } <ASSIGNMENT> val = Expression() <SEMICOLON>)
+    {	
+      if(!varType.equals(val.getType().toString())) {
+        throw new ParseException("Trying to assign " + val.getType() + " to " +  varType ); }
+
+      symbolTable.updateRecordVal(t.image, 0,0, val.getValue());}
 }
 
-Integer Expression() #Expression : {Integer val; Integer sumResult = null;}
+
+MyNumber Expression() #Expression : {MyNumber val; MyNumber sumResult = null;}
 {
 	val = MulDivExpr() sumResult = ExpressionExt(val)
 	{if (sumResult != null) return sumResult;
 	  return val;}
 }
 
-Integer ExpressionExt(Integer operand) #ExpressionExt : {String operator = null; Integer operand2 = null; Integer val = null; Integer result= null;  }
+MyNumber ExpressionExt(MyNumber operand) #ExpressionExt : {String operator = null; MyNumber operand2 = null; MyNumber val = null; MyNumber result= null;  }
 {
-  [sumDif() {operator = token.image;} operand2 = MulDivExpr() { if(operator.equals("+") ) { val = operand+operand2;} else if (operator.equals("-") ) {val = operand-operand2; }} result = ExpressionExt(val) {if(result != null) return result; return val; }]
+  [sumDif() {operator = token.image;} operand2 = MulDivExpr() { val= operand.sumSubNumber(operator, operand2); } result = ExpressionExt(val) {if(result != null) return result; return val; }]
   {return val; }
 }
 
 
-Integer MulDivExpr() #MulDivExpr : {Integer val; Integer val2;}
+MyNumber MulDivExpr() #MulDivExpr : {MyNumber val; MyNumber val2;}
 {
     val = Factor() val2 = MulDivExprExt(val)
     {if(val2 != null) return val2; 
     return val;}
-      
-}
+    }
 
-Integer MulDivExprExt(Integer operand) #MulDivExprExt : {boolean factorFound = false; String operator = null; Integer val = null; Integer fact = null; Integer mulDiv = null;}
+MyNumber MulDivExprExt(MyNumber operand) #MulDivExprExt : {boolean factorFound = false; String operator = null; MyNumber val = null; MyNumber fact = null; MyNumber mulDiv = null;}
 {
-  (< MULT_DIV > {operator = token.image; } fact = Factor() { if(operator.equals("*") ) { val = operand*fact; } else if (operator.equals("/") ) {val = operand/fact; }} mulDiv = MulDivExprExt(val) | {})
+  (< MULT_DIV > {operator = token.image;} fact = Factor() {  val = operand.multNumberDiv(operator, fact); } mulDiv = MulDivExprExt(val) | {})
   {if(mulDiv != null) return mulDiv; return val;}
 }
 
-Integer Factor() #Factor : {Integer val =0; Integer result = null;}
+MyNumber Factor() #Factor : {MyNumber val =null; MyNumber result = null;}
 {
-	(< ID > {val = (Integer) symbolTable.getRecord(token.image, 0,0).getValue();} | <NUMBER> { val = Integer.parseInt(token.image); }  | (<LEF_BRA> result = Expression() { if (result != null) val = result;} <RIGHT_BRA>) | <SUM_DIF><NUMBER> { val = Integer.parseInt(token.image);})
-	{return val;}
-}
+	(< ID > {val = new MyNumber(symbolTable.getRecord(token.image, 0,0).getType(),symbolTable.getRecord(token.image, 0,0).getValue().toString());} | val = MyNumber()   | (<LEF_BRA> result = Expression() { if (result != null) val = result;} <RIGHT_BRA>) | <SUM_DIF> val = MyNumber())
+{
+return val;}}
 
 void sumDif() #sumDif: { }
 {
   < SUM_DIF > { jjtn000.value = token.image;}
+}
+
+MyNumber MyNumber() : { String type; String image; }
+{
+  < NUMBER > { image = token.image; try { Integer.parseInt(token.image); type = "int";} catch (NumberFormatException e) { type = "float";} }
+  {return new MyNumber(type, token.image);}
 }
 
 

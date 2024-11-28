@@ -16,6 +16,7 @@ public interface TinyTreeConstants
   public int JJTMULDIVEXPREXT = 10;
   public int JJTFACTOR = 11;
   public int JJTSUMDIF = 12;
+  public int JJTVOID = 13;
 
 
   public String[] jjtNodeName = {
@@ -32,6 +33,7 @@ public interface TinyTreeConstants
     "MulDivExprExt",
     "Factor",
     "sumDif",
+    "void",
   };
 }
-/* JavaCC - OriginalChecksum=473cc092496ff04a2405220fa098484c (do not edit this line) */
+/* JavaCC - OriginalChecksum=eb53f1af20bb7b882a51006cb60d46e2 (do not edit this line) */

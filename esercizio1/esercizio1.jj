@@ -109,7 +109,7 @@ TOKEN : {
 }
 
 TOKEN : {
-  <#NUMBA: (["0"-"9"])>
+  	<#NUMBA: (["0"-"9"])+ (("." | ",") (["0"-"9"])+ )?>
   | <#LETTER: (["A"-"Z","a"-"z"])>
 }
 
@@ -170,29 +170,28 @@ void Statements()             : {/*@bgen(jjtree) Statements */
   jjtree.openNodeScope(jjtn000);
 /*@egen*/}
 {/*@bgen(jjtree) Statements */
-    try {
+  try {
 /*@egen*/
- 
-    Statement()  [Statements()]/*@bgen(jjtree)*/
-    } catch (Throwable jjte000) {
-      if (jjtc000) {
-        jjtree.clearNodeScope(jjtn000);
-        jjtc000 = false;
-      } else {
-        jjtree.popNode();
-      }
-      if (jjte000 instanceof RuntimeException) {
-        throw (RuntimeException)jjte000;
-      }
-      if (jjte000 instanceof ParseException) {
-        throw (ParseException)jjte000;
-      }
-      throw (Error)jjte000;
-    } finally {
-      if (jjtc000) {
-        jjtree.closeNodeScope(jjtn000, true);
-      }
+  Statement()  [Statements()]/*@bgen(jjtree)*/
+  } catch (Throwable jjte000) {
+    if (jjtc000) {
+      jjtree.clearNodeScope(jjtn000);
+      jjtc000 = false;
+    } else {
+      jjtree.popNode();
     }
+    if (jjte000 instanceof RuntimeException) {
+      throw (RuntimeException)jjte000;
+    }
+    if (jjte000 instanceof ParseException) {
+      throw (ParseException)jjte000;
+    }
+    throw (Error)jjte000;
+  } finally {
+    if (jjtc000) {
+      jjtree.closeNodeScope(jjtn000, true);
+    }
+  }
 /*@egen*/ 
 }
 
@@ -258,7 +257,7 @@ void declaration()              : {/*@bgen(jjtree) declaration */
 	{/*@bgen(jjtree) declaration */
           try {
 /*@egen*/
-	  < TYPE > { jjtn000.value = token.image; type = token.image;} <ID > multiDeclaration(type) < SEMICOLON>/*@bgen(jjtree)*/
+	  < TYPE > { jjtn000.value = token.image; type = token.image;} <ID > {symbolTable.put(token.image, token.kind, 0,0,0,0); symbolTable.updateRecordType(token.image,0,0,type); jjtn000.value = token.image;} multiDeclaration(type) < SEMICOLON>/*@bgen(jjtree)*/
           } catch (Throwable jjte000) {
             if (jjtc000) {
               jjtree.clearNodeScope(jjtn000);
@@ -322,17 +321,21 @@ void Assignment()             : {/*@bgen(jjtree) Assignment */
                                  ASTAssignment jjtn000 = new ASTAssignment(JJTASSIGNMENT);
                                  boolean jjtc000 = true;
                                  jjtree.openNodeScope(jjtn000);
-/*@egen*/Token t; Integer val;}
+/*@egen*/Token t; MyNumber val; String varType; String valueType;}
   {/*@bgen(jjtree) Assignment */
     try {
 /*@egen*/
-    (<ID> {t = token;  } <ASSIGNMENT> val = Expression() <SEMICOLON>)/*@bgen(jjtree)*/
+    (<ID> {t = token;  jjtn000.value = token.image; varType = symbolTable.getRecord(token.image,0,0).getType(); } <ASSIGNMENT> val = Expression() <SEMICOLON>)/*@bgen(jjtree)*/
     {
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
     }
 /*@egen*/
-    {symbolTable.updateRecordVal(t.image, 0,0, val); }/*@bgen(jjtree)*/
+    {	
+      if(!varType.equals(val.getType().toString())) {
+        throw new ParseException("Trying to assign " + val.getType() + " to " +  varType ); }
+
+      symbolTable.updateRecordVal(t.image, 0,0, val.getValue());}/*@bgen(jjtree)*/
     } catch (Throwable jjte000) {
       if (jjtc000) {
         jjtree.clearNodeScope(jjtn000);
@@ -355,11 +358,12 @@ void Assignment()             : {/*@bgen(jjtree) Assignment */
 /*@egen*/
 }
 
-Integer Expression()             : {/*@bgen(jjtree) Expression */
-                                    ASTExpression jjtn000 = new ASTExpression(JJTEXPRESSION);
-                                    boolean jjtc000 = true;
-                                    jjtree.openNodeScope(jjtn000);
-/*@egen*/Integer val; Integer sumResult = null;}
+
+MyNumber Expression()             : {/*@bgen(jjtree) Expression */
+                                     ASTExpression jjtn000 = new ASTExpression(JJTEXPRESSION);
+                                     boolean jjtc000 = true;
+                                     jjtree.openNodeScope(jjtn000);
+/*@egen*/MyNumber val; MyNumber sumResult = null;}
 {/*@bgen(jjtree) Expression */
         try {
 /*@egen*/
@@ -393,15 +397,15 @@ Integer Expression()             : {/*@bgen(jjtree) Expression */
 /*@egen*/
 }
 
-Integer ExpressionExt(Integer operand)                : {/*@bgen(jjtree) ExpressionExt */
-                                                         ASTExpressionExt jjtn000 = new ASTExpressionExt(JJTEXPRESSIONEXT);
-                                                         boolean jjtc000 = true;
-                                                         jjtree.openNodeScope(jjtn000);
-/*@egen*/String operator = null; Integer operand2 = null; Integer val = null; Integer result= null;  }
+MyNumber ExpressionExt(MyNumber operand)                : {/*@bgen(jjtree) ExpressionExt */
+                                                           ASTExpressionExt jjtn000 = new ASTExpressionExt(JJTEXPRESSIONEXT);
+                                                           boolean jjtc000 = true;
+                                                           jjtree.openNodeScope(jjtn000);
+/*@egen*/String operator = null; MyNumber operand2 = null; MyNumber val = null; MyNumber result= null;  }
 {/*@bgen(jjtree) ExpressionExt */
   try {
 /*@egen*/
-  [sumDif() {operator = token.image;} operand2 = MulDivExpr() { if(operator.equals("+") ) { val = operand+operand2;} else if (operator.equals("-") ) {val = operand-operand2; }} result = ExpressionExt(val) {if(result != null) return result; return val; }]/*@bgen(jjtree)*/
+  [sumDif() {operator = token.image;} operand2 = MulDivExpr() { val= operand.sumSubNumber(operator, operand2); } result = ExpressionExt(val) {if(result != null) return result; return val; }]/*@bgen(jjtree)*/
   {
     jjtree.closeNodeScope(jjtn000, true);
     jjtc000 = false;
@@ -431,11 +435,11 @@ Integer ExpressionExt(Integer operand)                : {/*@bgen(jjtree) Express
 }
 
 
-Integer MulDivExpr()             : {/*@bgen(jjtree) MulDivExpr */
-                                    ASTMulDivExpr jjtn000 = new ASTMulDivExpr(JJTMULDIVEXPR);
-                                    boolean jjtc000 = true;
-                                    jjtree.openNodeScope(jjtn000);
-/*@egen*/Integer val; Integer val2;}
+MyNumber MulDivExpr()             : {/*@bgen(jjtree) MulDivExpr */
+                                     ASTMulDivExpr jjtn000 = new ASTMulDivExpr(JJTMULDIVEXPR);
+                                     boolean jjtc000 = true;
+                                     jjtree.openNodeScope(jjtn000);
+/*@egen*/MyNumber val; MyNumber val2;}
 {/*@bgen(jjtree) MulDivExpr */
     try {
 /*@egen*/
@@ -467,18 +471,17 @@ Integer MulDivExpr()             : {/*@bgen(jjtree) MulDivExpr */
       }
     }
 /*@egen*/
-      
-}
+    }
 
-Integer MulDivExprExt(Integer operand)                : {/*@bgen(jjtree) MulDivExprExt */
-                                                         ASTMulDivExprExt jjtn000 = new ASTMulDivExprExt(JJTMULDIVEXPREXT);
-                                                         boolean jjtc000 = true;
-                                                         jjtree.openNodeScope(jjtn000);
-/*@egen*/boolean factorFound = false; String operator = null; Integer val = null; Integer fact = null; Integer mulDiv = null;}
+MyNumber MulDivExprExt(MyNumber operand)                : {/*@bgen(jjtree) MulDivExprExt */
+                                                           ASTMulDivExprExt jjtn000 = new ASTMulDivExprExt(JJTMULDIVEXPREXT);
+                                                           boolean jjtc000 = true;
+                                                           jjtree.openNodeScope(jjtn000);
+/*@egen*/boolean factorFound = false; String operator = null; MyNumber val = null; MyNumber fact = null; MyNumber mulDiv = null;}
 {/*@bgen(jjtree) MulDivExprExt */
   try {
 /*@egen*/
-  (< MULT_DIV > {operator = token.image; } fact = Factor() { if(operator.equals("*") ) { val = operand*fact; } else if (operator.equals("/") ) {val = operand/fact; }} mulDiv = MulDivExprExt(val) | {})/*@bgen(jjtree)*/
+  (< MULT_DIV > {operator = token.image;} fact = Factor() {  val = operand.multNumberDiv(operator, fact); } mulDiv = MulDivExprExt(val) | {})/*@bgen(jjtree)*/
   {
     jjtree.closeNodeScope(jjtn000, true);
     jjtc000 = false;
@@ -507,21 +510,22 @@ Integer MulDivExprExt(Integer operand)                : {/*@bgen(jjtree) MulDivE
 /*@egen*/
 }
 
-Integer Factor()         : {/*@bgen(jjtree) Factor */
-                            ASTFactor jjtn000 = new ASTFactor(JJTFACTOR);
-                            boolean jjtc000 = true;
-                            jjtree.openNodeScope(jjtn000);
-/*@egen*/Integer val =0; Integer result = null;}
+MyNumber Factor()         : {/*@bgen(jjtree) Factor */
+                             ASTFactor jjtn000 = new ASTFactor(JJTFACTOR);
+                             boolean jjtc000 = true;
+                             jjtree.openNodeScope(jjtn000);
+/*@egen*/MyNumber val =null; MyNumber result = null;}
 {/*@bgen(jjtree) Factor */
         try {
 /*@egen*/
-	(< ID > {val = (Integer) symbolTable.getRecord(token.image, 0,0).getValue();} | <NUMBER> { val = Integer.parseInt(token.image); }  | (<LEF_BRA> result = Expression() { if (result != null) val = result;} <RIGHT_BRA>) | <SUM_DIF><NUMBER> { val = Integer.parseInt(token.image);})/*@bgen(jjtree)*/
-        {
-          jjtree.closeNodeScope(jjtn000, true);
-          jjtc000 = false;
-        }
+	(< ID > {val = new MyNumber(symbolTable.getRecord(token.image, 0,0).getType(),symbolTable.getRecord(token.image, 0,0).getValue().toString());} | val = MyNumber()   | (<LEF_BRA> result = Expression() { if (result != null) val = result;} <RIGHT_BRA>) | <SUM_DIF> val = MyNumber())/*@bgen(jjtree)*/
+{
+  jjtree.closeNodeScope(jjtn000, true);
+  jjtc000 = false;
+}
 /*@egen*/
-	{return val;}/*@bgen(jjtree)*/
+{
+return val;}/*@bgen(jjtree)*/
         } catch (Throwable jjte000) {
           if (jjtc000) {
             jjtree.clearNodeScope(jjtn000);
@@ -541,8 +545,7 @@ Integer Factor()         : {/*@bgen(jjtree) Factor */
             jjtree.closeNodeScope(jjtn000, true);
           }
         }
-/*@egen*/
-}
+/*@egen*/}
 
 void sumDif()        : {/*@bgen(jjtree) sumDif */
   ASTsumDif jjtn000 = new ASTsumDif(JJTSUMDIF);
@@ -564,4 +567,10 @@ void sumDif()        : {/*@bgen(jjtree) sumDif */
     }
   }
 /*@egen*/
+}
+
+MyNumber MyNumber() : { String type; String image; }
+{
+  < NUMBER > { image = token.image; try { Integer.parseInt(token.image); type = "int";} catch (NumberFormatException e) { type = "float";} }
+  {return new MyNumber(type, token.image);}
 }
