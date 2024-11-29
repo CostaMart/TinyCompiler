@@ -33,7 +33,12 @@ public class Tiny {
 
         Tiny t = new Tiny(s);
         SimpleNode n = t.Program();
-        printTree(n,"",true);
+        for(String str : args){
+          switch(str) { 
+            case "-t": printTree(n, "", true);
+            break;
+            }
+           }
         
     }
 
@@ -101,7 +106,6 @@ TOKEN : {
   | <MULT_DIV: ("/"|"*")>                       { KEYS++; }
   | <SUM_DIF: ("-"|"+")>                        { KEYS++; }
   | <COMPARISON: ("<"|">")>                 { KEYS++; }
-
 }
 
 TOKEN : {
@@ -158,11 +162,13 @@ void multiDeclaration(String type) #multiDeclaration:  {}
 
 void Assignment() #Assignment : {Token t; MyNumber val; String varType; String valueType;}
   {
-    (<ID> {t = token;  jjtn000.value = token.image; varType = symbolTable.getRecord(token.image,0,0).getType(); } <ASSIGNMENT> val = Expression() <SEMICOLON>)
+    (<ID> {t = token;  jjtn000.value = token.image; varType = symbolTable.getRecord(token.image,0,0).getType();
+     if(varType == null) {throw new ParseException("variable '" + t.image +"' has not been declared");} } <ASSIGNMENT> val = Expression() <SEMICOLON>)
     {	
+     	
       if(!varType.equals(val.getType().toString())) {
         throw new ParseException("Trying to assign " + val.getType() + " to " +  varType ); }
-
+	
       symbolTable.updateRecordVal(t.image, 0,0, val.getValue());}
 }
 
@@ -196,7 +202,13 @@ MyNumber MulDivExprExt(MyNumber operand) #MulDivExprExt : {boolean factorFound =
 
 MyNumber Factor() #Factor : {MyNumber val =null; MyNumber result = null;}
 {
-	(< ID > {val = new MyNumber(symbolTable.getRecord(token.image, 0,0).getType(),symbolTable.getRecord(token.image, 0,0).getValue().toString());} | val = MyNumber()   | (<LEF_BRA> result = Expression() { if (result != null) val = result;} <RIGHT_BRA>) | <SUM_DIF> val = MyNumber())
+	(< ID > {
+
+	SymbolTable.Record n = symbolTable.getRecord(token.image, 0,0);
+	if(n.getType() == null) { throw new ParseException("variable '" + token.image +"' has not been declared");}
+	if (n.getValue() == null) { throw new ParseException("variable '" + token.image +"' has not been initialized");}
+	val = new MyNumber(n.getType(), n.getValue().toString()); } | val = MyNumber()
+	| (<LEF_BRA> result = Expression() { if (result != null) val = result;} <RIGHT_BRA>) | <SUM_DIF> val = MyNumber())
 {
 return val;}}
 

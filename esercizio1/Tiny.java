@@ -25,7 +25,12 @@ public class Tiny/*@bgen(jjtree)*/implements TinyTreeConstants, TinyConstants {/
 
         Tiny t = new Tiny(s);
         SimpleNode n = t.Program();
-        printTree(n,"",true);
+        for(String str : args){
+          switch(str) {
+            case "-t": printTree(n, "", true);
+            break;
+            }
+           }
 
     }
 
@@ -289,6 +294,7 @@ if (jjtc000) {
     try {
       jj_consume_token(ID);
 t = token;  jjtn000.value = token.image; varType = symbolTable.getRecord(token.image,0,0).getType();
+     if(varType == null) {{if (true) throw new ParseException("variable '" + t.image +"' has not been declared");}}
       jj_consume_token(ASSIGNMENT);
       val = Expression();
       jj_consume_token(SEMICOLON);
@@ -480,7 +486,10 @@ if (jjtc000) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case ID:{
         jj_consume_token(ID);
-val = new MyNumber(symbolTable.getRecord(token.image, 0,0).getType(),symbolTable.getRecord(token.image, 0,0).getValue().toString());
+SymbolTable.Record n = symbolTable.getRecord(token.image, 0,0);
+        if(n.getType() == null) { {if (true) throw new ParseException("variable '" + token.image +"' has not been declared");}}
+        if (n.getValue() == null) { {if (true) throw new ParseException("variable '" + token.image +"' has not been initialized");}}
+        val = new MyNumber(n.getType(), n.getValue().toString());
         break;
         }
       case NUMBER:{

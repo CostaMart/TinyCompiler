@@ -37,7 +37,12 @@ public class Tiny/*@bgen(jjtree)*/implements TinyTreeConstants/*@egen*/ {/*@bgen
 
         Tiny t = new Tiny(s);
         SimpleNode n = t.Program();
-        printTree(n,"",true);
+        for(String str : args){
+          switch(str) { 
+            case "-t": printTree(n, "", true);
+            break;
+            }
+           }
         
     }
 
@@ -105,7 +110,6 @@ TOKEN : {
   | <MULT_DIV: ("/"|"*")>                       { KEYS++; }
   | <SUM_DIF: ("-"|"+")>                        { KEYS++; }
   | <COMPARISON: ("<"|">")>                 { KEYS++; }
-
 }
 
 TOKEN : {
@@ -325,16 +329,18 @@ void Assignment()             : {/*@bgen(jjtree) Assignment */
   {/*@bgen(jjtree) Assignment */
     try {
 /*@egen*/
-    (<ID> {t = token;  jjtn000.value = token.image; varType = symbolTable.getRecord(token.image,0,0).getType(); } <ASSIGNMENT> val = Expression() <SEMICOLON>)/*@bgen(jjtree)*/
+    (<ID> {t = token;  jjtn000.value = token.image; varType = symbolTable.getRecord(token.image,0,0).getType();
+     if(varType == null) {throw new ParseException("variable '" + t.image +"' has not been declared");} } <ASSIGNMENT> val = Expression() <SEMICOLON>)/*@bgen(jjtree)*/
     {
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
     }
 /*@egen*/
     {	
+     	
       if(!varType.equals(val.getType().toString())) {
         throw new ParseException("Trying to assign " + val.getType() + " to " +  varType ); }
-
+	
       symbolTable.updateRecordVal(t.image, 0,0, val.getValue());}/*@bgen(jjtree)*/
     } catch (Throwable jjte000) {
       if (jjtc000) {
@@ -518,7 +524,13 @@ MyNumber Factor()         : {/*@bgen(jjtree) Factor */
 {/*@bgen(jjtree) Factor */
         try {
 /*@egen*/
-	(< ID > {val = new MyNumber(symbolTable.getRecord(token.image, 0,0).getType(),symbolTable.getRecord(token.image, 0,0).getValue().toString());} | val = MyNumber()   | (<LEF_BRA> result = Expression() { if (result != null) val = result;} <RIGHT_BRA>) | <SUM_DIF> val = MyNumber())/*@bgen(jjtree)*/
+	(< ID > {
+
+	SymbolTable.Record n = symbolTable.getRecord(token.image, 0,0);
+	if(n.getType() == null) { throw new ParseException("variable '" + token.image +"' has not been declared");}
+	if (n.getValue() == null) { throw new ParseException("variable '" + token.image +"' has not been initialized");}
+	val = new MyNumber(n.getType(), n.getValue().toString()); } | val = MyNumber()
+	| (<LEF_BRA> result = Expression() { if (result != null) val = result;} <RIGHT_BRA>) | <SUM_DIF> val = MyNumber())/*@bgen(jjtree)*/
 {
   jjtree.closeNodeScope(jjtn000, true);
   jjtc000 = false;
